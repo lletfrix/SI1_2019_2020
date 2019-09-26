@@ -1,0 +1,84 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Nunito;
+}
+
+body {
+    background-color: #222C35;
+}
+
+.main-header-footer {
+    display: flex;
+    background-color: #1C3144;
+    justify-content: space-around;
+    color: white;
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    align-items: center;
+    min-height: 5em;
+    max-height: 6em;
+    box-shadow:0 0 1em #222;
+}
+
+.header {
+    top: 0;
+}
+
+.footer {
+    bottom: 0;
+}
+
+.side-menu {
+    height: 100%;
+    background-color: #1C3144;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    justify-content: center;
+    align-items: center;
+    box-shadow:0 0 0.5em #222;
+}
+
+.side-menu > .user-container{
+    display: flex;
+    flex-direction: inherit;
+    justify-content: inherit;
+    align-items: center;
+
+}
+
+.side-menu > .user-container > .user-image img {
+    height: 150px;
+    width: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    padding: 1em;
+}
+
+.side-menu > .user-container > .username {
+    color: #A2AEBB;
+    font-weight: 700;
+    font-size: 1.3em;
+}
+
+.side-menu > .option-container {
+    border: 1pt solid red;
+    display: flex;
+    flex-direction: column;
+    padding:1.5em 1em 0 1em;
+}
+
+.side-menu > .option-container > .menu-option {
+    margin: 0.6em;
+}
+
+.side-menu > .option-container > .menu-option > a{
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 1.1em;
+    color: #ddd;
+}
