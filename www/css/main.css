@@ -9,10 +9,15 @@ body {
     background-color: #222C35;
 }
 
+
+.login-panel-container > a {
+    text-decoration: none;
+    color: white;
+}
+
 .main-header-footer {
     display: flex;
     background-color: #1C3144;
-    justify-content: space-around;
     color: white;
     position: fixed;
     left: 0;
@@ -26,10 +31,41 @@ body {
 
 .header {
     top: 0;
+    justify-content: space-between;
+    padding-left: 5vw;
+    padding-right: 5vw;
 }
 
 .footer {
     bottom: 0;
+    justify-content: space-around;
+    font-family: monospace;
+}
+
+.footer > .githubs {
+    font-family: monospace;
+    color: white;
+}
+
+.footer > .githubs > a {
+    text-decoration: none;
+    color: inherit;
+    font-family: inherit;
+}
+
+.logo-container {
+    align-items: center;
+    display: flex;
+}
+
+.logo-container > img {
+    max-height: 4em;
+}
+
+.logo-name {
+    font-family: 'Space Mono';
+    font-weight: bold;
+    font-size: 1.8em;
 }
 
 .side-menu {
@@ -66,7 +102,6 @@ body {
 }
 
 .side-menu > .option-container {
-    border: 1pt solid red;
     display: flex;
     flex-direction: column;
     padding:1.5em 1em 0 1em;
@@ -74,6 +109,7 @@ body {
 
 .side-menu > .option-container > .menu-option {
     margin: 0.6em;
+    display: flex;
 }
 
 .side-menu > .option-container > .menu-option > a{
@@ -81,4 +117,9 @@ body {
     text-decoration: none;
     font-size: 1.1em;
     color: #ddd;
+}
+
+.side-menu > .option-container > .menu-option > i {
+    color: #ddd;
+    margin-left: 1vw;
 }
