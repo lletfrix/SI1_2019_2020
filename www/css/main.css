@@ -144,12 +144,18 @@ input[type="submit"]:hover {
     font-family: inherit;
 }
 
-.logo-container {
+.logo-container > a{
     align-items: center;
     display: flex;
+    font-family: 'Space Mono';
+    font-weight: bold;
+    font-size: 1em;
+    text-decoration: none;
+    color: white;
+
 }
 
-.logo-container > img {
+.logo-container img {
     max-height: 4em;
 }
 
@@ -157,6 +163,7 @@ input[type="submit"]:hover {
     font-family: 'Space Mono';
     font-weight: bold;
     font-size: 1.8em;
+    text-decoration: none;
 }
 
 .side-menu {
@@ -214,4 +221,15 @@ input[type="submit"]:hover {
 .side-menu > .option-container > .menu-option > a > i {
     color: #ddd;
     margin-left: 1vw;
+}
+
+.form-container {
+    padding: 7em 15vw 2em 15vw;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.mail-input input:invalid {
+    color: red;
 }
