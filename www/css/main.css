@@ -41,7 +41,9 @@ input:focus{
     border-color:#4d90fe;
 }
 
-input[type="submit"] {
+.search-button {
+    appearance: button;
+    text-decoration: none;
     border-radius: 2px;
     background: #f2f2f2;
     border: 1px solid #f2f2f2;
@@ -50,10 +52,9 @@ input[type="submit"] {
     font-size: 14px;
     font-weight: bold;
     width: 100px;
-    padding: 0 16px;
-    height:36px;
+    padding: 10px 16px 10px;
 }
-input[type="submit"]:hover {
+.search-button:hover {
     box-shadow: 0 1px 1px rgba(0,0,0,0.1);
     background: #f8f8f8;
     border: 1px solid #c6c6c6;
@@ -270,7 +271,9 @@ input[type="submit"]:hover {
 
 .register-button {
     padding: 1rem 2vw 1rem 2vw;
-    margin: 0;
+    margin: 1rem 0;
+    appearance: button;
+    text-decoration: none;
 }
 
 .product-cover {
