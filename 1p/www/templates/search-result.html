@@ -1,3 +1,12 @@
+<!--                                                                           >
+<   Authors:                                                                   >
+<       · Alejandro Santorum Varela - aleandro.santorum@estudiante.uam.es      >
+<       · Rafael Sanchez Sanchez - rsanchezs@estudiante.uam.es                 >
+<   File: search-result.html                                                   >
+<   Project: 1st assignment - Computer Systems I                               >
+<   Date: October 1, 2019                                                      >
+<                                                                            -->
+
 <!DOCTYPE html>
 <html lang="es" dir="ltr">
     <head>
@@ -9,6 +18,8 @@
         <title>Rafa & Alejandro App</title>
     </head>
     <body>
+
+        <!-- Header -->
         <header class="main-header-footer header">
             <div class="logo-container">
                 <a href="./logged-user.html">
@@ -22,6 +33,7 @@
             </div>
         </header>
 
+        <!-- Side menu -->
         <div class="side-menu">
             <div class="user-container">
                 <div class="user-image">
@@ -47,12 +59,12 @@
             </div>
         </div>
 
-
-
         <!-- Content page -->
         <div class="content-container">
             <div class="search-bar-container">
+                <!-- Search bar -->
                 <input id="search-bar" type="text" name="search">
+                <!-- Filter selector -->
                 <select class="filter-selector" name="filters">
                     <option value="nofilter">Ningún resultado</option>
                     <option value="action">Acción</option>
@@ -60,11 +72,14 @@
                     <option value="drama">Drama</option>
                     <option value="thriller">Thriller</option>
                 </select>
+                <!-- Search button -->
                 <a href="./search-result.html" class="search-button">Buscar</a>
             </div>
+            <!-- Page title -->
             <div class="search-title-container">
                 <span id="search-title">HARRY POTTER (8)</span>
             </div>
+            <!-- Film container -->
             <div class="films-container">
                 <div class="cover-container">
                     <a href="#">
@@ -118,7 +133,6 @@
         </div>
 
         <!-- Footer -->
-
         <footer class="main-header-footer footer">
             <div class="githubs">
                 &copy;
