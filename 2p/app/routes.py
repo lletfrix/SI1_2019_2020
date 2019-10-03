@@ -8,5 +8,10 @@ import os
 import sys
 
 @app.route('/')
+@app.route('/index.html')
 def index():
     return render_template('index.html')
+
+@app.route('/register', methods=['GET'])
+def register():
+    return render_template('register.html')
