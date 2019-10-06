@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 
+{% block title_block %}
+DViDeo - {{ title }}
+{% endblock %}
+
 {% block content_block %}
-    <div class="search-bar-container">
+    <form class="search-bar-container" action="index.html" method="post">
+            <input id="search-bar" type="text" name="title">
         <!-- Search bar -->
-        <input id="search-bar" type="text" name="search">
         <!-- Filter selector -->
-        <select class="filter-selector" name="filters">
+        <select class="filter-selector" name="filter">
             <option value="nofilter">Ningún filtro</option>
             <option value="action">Acción</option>
             <option value="comedy">Comedia</option>
@@ -13,8 +17,8 @@
             <option value="thriller">Thriller</option>
         </select>
         <!-- Search button -->
-        <a href="#" class="search-button">Buscar</a>
-    </div>
+        <input class="search-button" type="submit" name="submit" value="Buscar">
+    </form>
     <!-- Page title -->
     <div class="search-title-container">
         <span id="search-title">ÚLTIMAS PELÍCULAS</span>
