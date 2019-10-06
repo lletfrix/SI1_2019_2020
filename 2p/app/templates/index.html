@@ -1,59 +1,44 @@
 {% extends "base.html" %}
 
 {% block title_block %}
-DViDeo - {{ title }}
+    {{ title }}
 {% endblock %}
 
 {% block content_block %}
     <form class="search-bar-container" action="index.html" method="post">
-            <input id="search-bar" type="text" name="title">
         <!-- Search bar -->
+        <input id="search-bar" type="text" name="title">
         <!-- Filter selector -->
-        <select class="filter-selector" name="filter">
-            <option value="nofilter">Ningún filtro</option>
-            <option value="action">Acción</option>
-            <option value="comedy">Comedia</option>
-            <option value="drama">Drama</option>
-            <option value="thriller">Thriller</option>
+        <select class="filter-selector" name="category">
+            <option value="Ninguno">Ningún filtro</option>
+            <option value="Accion">Acción</option>
+            <option value="Aventuras">Aventuras</option>
+            <option value="Comedia">Comedia</option>
+            <option value="Drama">Drama</option>
+            <option value="Magia">Magia</option>
+            <option value="Thriller">Thriller</option>
         </select>
         <!-- Search button -->
         <input class="search-button" type="submit" name="submit" value="Buscar">
     </form>
     <!-- Page title -->
     <div class="search-title-container">
-        <span id="search-title">ÚLTIMAS PELÍCULAS</span>
+        {% if search_query %}
+            <span id="search-title">{{ search_query }}</span>
+        {% else %}
+            <span id="search-title">ÚLTIMAS PELÍCULAS</span>
+        {% endif %}
     </div>
     <!-- Film container -->
     <div class="films-container">
-        <div class="cover-container">
-            <a href="#">
-                <img class="cover" src="../static/img/cars.jpg" alt="cars">
-                <span>Cars</span>
-            </a>
-        </div>
-        <div class="cover-container">
-            <a href="#">
-                <img class="cover" src="../static/img/hp8.jpg" alt="harry potter 8">
-                <span>Harry Potter 8</span>
-            </a>
-        </div>
-        <div class="cover-container">
-            <a href="#">
-                <img class="cover" src="../static/img/o13.jpg" alt="oceans 13">
-                <span>Ocean's 13</span>
-            </a>
-        </div>
-        <div class="cover-container">
-            <a href="#">
-                <img class="cover" src="../static/img/sw4.jpg" alt="stars wars 4">
-                <span>Star Wars IV</span>
-            </a>
-        </div>
-        <div class="cover-container">
-            <a href="#">
-                <img class="cover" src="../static/img/sw7.jpg" alt="star wars 7">
-                <span>Star Wars VII</span>
-            </a>
-        </div>
+
+        {% for film in films %}
+            <div class="cover-container">
+                <a href="{{ url_for('product', id=film.id) }}">
+                    <img class="cover" src="../static/img/{{ film.poster }}" alt="{{ film.titulo }}">
+                    <span class="cover-title">{{ film.titulo }}</span>
+                </a>
+            </div>
+        {% endfor %}
     </div>
 {% endblock %}

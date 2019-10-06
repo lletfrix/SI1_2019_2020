@@ -10,24 +10,45 @@ import sys
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index.html', methods=['GET', 'POST'])
 def index():
-    movies = None
+    films = None
     if request.method == 'POST':
         # Get the search result
         title = request.form.get('title')
-        filter = request.form.get('filter')
-        with open(os.path.join(app.root_path,'catalogue/catalogue.json'), encoding="utf-8") as data_file:
+        category = request.form.get('category')
+
+        if (not title) and category == 'Ninguno':
+            return redirect(url_for('index'))
+
+        with open(os.path.join(app.root_path,'catalogue/catalogo.json'), encoding="utf-8") as data_file:
             catalogue = json.loads(data_file.read())
-            movies = catalogue['peliculas']
-            # movies = list(filter(, movies))
-        return render_template('index.html', title='Búsqueda', movies=movies)
-        
+            films = catalogue['peliculas']
+            if category != 'Ninguno':
+                films = list(filter(lambda f: category in f['categorias'], films))
+            films = list(filter(lambda f: title.lower() in f['titulo'].lower(), films))
+
+        if not title:
+            title = 'Peliculas en la catergoría: '+category
+        return render_template('index.html', title='Búsqueda', films=films, search_query=title)
+
     else:
-        # Get the last movies
-        with open(os.path.join(app.root_path,'catalogue/catalogue.json'), encoding="utf-8") as data_file:
+        # Get the last films
+        with open(os.path.join(app.root_path,'catalogue/catalogo.json'), encoding="utf-8") as data_file:
             catalogue = json.loads(data_file.read())
-            movies = catalogue['peliculas']
-            # movies = list(filter(, movies))
-        return render_template('index.html', title='Home', movies=movies)
+            films = catalogue['peliculas']
+            films = sorted(films, key=(lambda m : m['anio']), reverse=True)[:10]
+
+        return render_template('index.html', title='Home', films=films, search_query=None)
+
+
+@app.route('/product/<id>', methods=['GET'])
+def product(id):
+    with open(os.path.join(app.root_path,'catalogue/catalogo.json'), encoding="utf-8") as data_file:
+        catalogue = json.loads(data_file.read())
+        films = catalogue['peliculas']
+        film = list(filter(lambda f: int(id) == f['id'], films))[0]
+
+    return render_template('product.html', title=film['titulo'], film=film)
+
 
 @app.route('/register', methods=['GET'])
 def register():

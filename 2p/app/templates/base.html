@@ -15,15 +15,15 @@
         <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Space+Mono:400,700&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <title>{% block title_block %}{% endblock %}</title>
+        <title>DViDeo - {% block title_block %}{% endblock %}</title>
     </head>
     <body>
 
         <!-- Header -->
         <header class="main-header-footer header">
             <div class="logo-container">
-                <a href="./index.html">
-                    <img src="../static/img/logo.svg" alt="logo">
+                <a href="{{ url_for('index') }}">
+                    <img src="{{ url_for('static', filename='img/logo.svg')}}" alt="logo">
                     <span class="logo-name">DViDeo</span>
                 </a>
             </div>
