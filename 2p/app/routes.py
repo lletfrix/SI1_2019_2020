@@ -10,6 +10,16 @@ import random
 import pickle
 import hashlib
 
+USERS_FOLDER = 'usuarios'
+NICK_IDX = 0
+PASS_IDX = 1
+MAIL_IDX = 2
+CCARD_IDX = 3
+CASH_IDX = 4
+DATA_FILE = 'datos.dat'
+HIST_FILE = 'historial.json'
+
+
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index.html', methods=['GET', 'POST'])
 def index():
@@ -66,7 +76,7 @@ def register():
             flash('Por favor, rellene todos los campos')
             return render_template('register.html')
         # Check user is available
-        users = next(os.walk(os.path.join(app.root_path, 'usuarios/')))[1]
+        users = next(os.walk(os.path.join(app.root_path, USERS_FOLDER)))[1]
         if nick in users:
             flash('Usuario no disponible')
             return render_template('register.html')
@@ -79,11 +89,11 @@ def register():
         data = [nick, encpwd, mail, ccard, random.randint(0, 100)]
         # Writing user data file
         slug_nick = nick.lower()
-        os.mkdir(os.path.join(app.root_path, 'usuarios', slug_nick))
-        with open(os.path.join(app.root_path, 'usuarios', slug_nick, 'datos.dat'), 'wb') as file:
+        os.mkdir(os.path.join(app.root_path, USERS_FOLDER, slug_nick))
+        with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, DATA_FILE), 'wb') as file:
             pickle.dump(data, file)
         # Initializing user history file
-        with open(os.path.join(app.root_path, 'usuarios', slug_nick, 'historial.json'), 'w') as file:
+        with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), 'w') as file:
             history = {'historial': []}
             json.dump(history, file)
 
@@ -105,7 +115,7 @@ def login():
             return render_template('login.html')
         # Checking if the user is already registered
         slug_nick = nick.lower()
-        users = next(os.walk(os.path.join(app.root_path, 'usuarios/')))[1]
+        users = next(os.walk(os.path.join(app.root_path, USERS_FOLDER)))[1]
         if slug_nick not in users:
             flash('Usuario no registrado')
             return render_template('login.html')
@@ -113,15 +123,16 @@ def login():
         md5 = hashlib.md5()
         md5.update(passwd.encode('utf-8'))
         encpwd = md5.hexdigest()
-        with open(os.path.join(app.root_path, 'usuarios', slug_nick, 'datos.dat'), 'rb') as file:
+        with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, DATA_FILE), 'rb') as file:
             userdata = pickle.load(file)
-        if encpwd != userdata[1]:
+        if encpwd != userdata[PASS_IDX]:
             flash('Contraseña incorrecta')
             return render_template('login.html')
         # Sessions
-        session['nickname'] = userdata[0]
-        session['mail'] = userdata[2]
-        session['ccard'] = userdata[3]
+        session['nickname'] = userdata[NICK_IDX]
+        session['mail'] = userdata[MAIL_IDX]
+        session['ccard'] = userdata[CCARD_IDX]
+        session['cash'] = userdata[CASH_IDX]
 
         return redirect(url_for('index'))
     else:
