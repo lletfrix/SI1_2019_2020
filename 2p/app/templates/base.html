@@ -31,14 +31,39 @@
 
         <!-- Side menu -->
         <div class="side-menu">
-            <div class="option-container">
-                <div class="menu-option">
-                    <a href="#">INICIAR SESIÓN</a>
+            {% if not session['nickname'] %}
+                <div class="option-container">
+                    <div class="menu-option">
+                        <a href="{{ url_for('login') }}">INICIAR SESIÓN</a>
+                    </div>
+                    <div class="menu-option">
+                        <a href="{{ url_for('register') }}">REGISTRARSE</a>
+                    </div>
                 </div>
-                <div class="menu-option">
-                    <a href="templates/register.html">REGISTRARSE</a>
+            {% else %}
+                <div class="user-container">
+                    <div class="user-image">
+                        <img src="../static/img/profile.jpg" alt="kermit the frog">
+                    </div>
+                    <div class="username">
+                        {{ session['nickname'] }}
+                    </div>
                 </div>
-            </div>
+                <div class="option-container">
+                    <div class="menu-option">
+                        <a href="#">PERFIL</a>
+                    </div>
+                    <div class="menu-option">
+                        <a href="history.html">HISTORIAL</a>
+                    </div>
+                    <div class="menu-option">
+                        <a href="#">CARRITO<i class="material-icons">shopping_cart</i></a>
+                    </div>
+                    <div class="menu-option">
+                        <a href="#">CONFIGURACIÓN</a>
+                    </div>
+                </div>
+            {% endif %}
         </div>
 
         <!-- Content page -->

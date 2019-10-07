@@ -33,6 +33,13 @@ body {
     padding-left: 5vw;
 }
 
+.form-container {
+    padding: 0em 15vw -5em 0vw;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
 select {
     border: none;
     padding: 0.75em;
@@ -248,13 +255,6 @@ input:focus{
     margin-left: 1vw;
 }
 
-.form-container {
-    padding: 7em 15vw 2em 15vw;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-}
-
 .mail-input input:invalid {
     color: red;
 }
@@ -336,4 +336,18 @@ input:focus{
 
 .history-table{
     margin-top: 2rem;
+}
+
+.alert {
+    border-radius: 0.5rem;
+    border-style: solid;
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    font-weight: bold;
+}
+
+.alert-warning {
+    background-color: BlanchedAlmond;
+    color: GoldenRod;
 }

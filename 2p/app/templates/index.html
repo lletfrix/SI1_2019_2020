@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content_block %}
-    <form class="search-bar-container" action="index.html" method="post">
+    <form class="search-bar-container" action="{{ url_for('index') }}" method="post">
         <!-- Search bar -->
         <input id="search-bar" type="text" name="title">
         <!-- Filter selector -->
