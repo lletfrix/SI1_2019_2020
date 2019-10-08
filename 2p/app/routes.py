@@ -137,3 +137,8 @@ def login():
         return redirect(url_for('index'))
     else:
         return render_template('login.html')
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('nickname', None)
+    return redirect(url_for('index'))

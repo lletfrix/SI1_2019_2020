@@ -27,6 +27,11 @@
                     <span class="logo-name">DViDeo</span>
                 </a>
             </div>
+            {% if session['nickname'] %}
+            <form class="login-panel-container" action="{{ url_for('logout') }}" method="post">
+                <input type="submit" name="submit" value="Cerrar Sesión">
+            </form>
+            {% endif %}
         </header>
 
         <!-- Side menu -->

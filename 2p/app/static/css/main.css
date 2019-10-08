@@ -133,9 +133,21 @@ input:focus{
     margin-left: 5vw;
 }
 
-.login-panel-container > a {
+.login-panel-container {
+    display: flex;
+}
+
+.login-panel-container > input {
     text-decoration: none;
     color: white;
+    background-color: transparent;
+    width: fit-content;
+    border: none;
+}
+
+.login-panel-container > input:hover{
+    text-decoration: underline !important;
+    cursor: pointer;
 }
 
 .main-header-footer {
