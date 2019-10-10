@@ -44,6 +44,9 @@
                     <div class="menu-option">
                         <a href="{{ url_for('register') }}">REGISTRARSE</a>
                     </div>
+                    <div class="menu-option">
+                        <a href="{{ url_for('cart') }}">CARRITO<i class="material-icons">shopping_cart</i></a>
+                    </div>
                 </div>
             {% else %}
                 <div class="user-container">
@@ -62,7 +65,7 @@
                         <a href="history.html">HISTORIAL</a>
                     </div>
                     <div class="menu-option">
-                        <a href="#">CARRITO<i class="material-icons">shopping_cart</i></a>
+                        <a href="{{ url_for('cart') }}">CARRITO<i class="material-icons">shopping_cart</i></a>
                     </div>
                     <div class="menu-option">
                         <a href="#">CONFIGURACIÓN</a>

@@ -18,12 +18,16 @@ CCARD_IDX = 3
 CASH_IDX = 4
 DATA_FILE = 'datos.dat'
 HIST_FILE = 'historial.json'
+CATALOGUE_FILE = 'catalogue/catalogo.json'
+DATE = '10/10/2019'
+ADDR = 'C/Erasmo de Rotterdam'
 
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index.html', methods=['GET', 'POST'])
 def index():
     films = None
+
     if request.method == 'POST':
         # Get the search result
         title = request.form.get('title')
@@ -32,7 +36,7 @@ def index():
         if (not title) and category == 'Ninguno':
             return redirect(url_for('index'))
 
-        with open(os.path.join(app.root_path,'catalogue/catalogo.json'), encoding="utf-8") as data_file:
+        with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
             catalogue = json.loads(data_file.read())
             films = catalogue['peliculas']
             if category != 'Ninguno':
@@ -45,7 +49,7 @@ def index():
 
     else:
         # Get the last films
-        with open(os.path.join(app.root_path,'catalogue/catalogo.json'), encoding="utf-8") as data_file:
+        with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
             catalogue = json.loads(data_file.read())
             films = catalogue['peliculas']
             films = sorted(films, key=(lambda m : m['anio']), reverse=True)[:10]
@@ -53,12 +57,18 @@ def index():
         return render_template('index.html', title='Home', films=films, search_query=None)
 
 
-@app.route('/product/<id>', methods=['GET'])
+@app.route('/product/<id>', methods=['GET', 'POST'])
 def product(id):
-    with open(os.path.join(app.root_path,'catalogue/catalogo.json'), encoding="utf-8") as data_file:
+    with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
         catalogue = json.loads(data_file.read())
         films = catalogue['peliculas']
-        film = list(filter(lambda f: int(id) == f['id'], films))[0]
+        film = list(filter(lambda f: f['id'] == int(id), films))[0]
+
+    if request.method == 'POST':
+        if session.get('cart'):
+            session['cart'].append(int(id))
+        else:
+            session['cart'] = [int(id)]
 
     return render_template('product.html', title=film['titulo'], film=film)
 
@@ -86,7 +96,8 @@ def register():
         md5.update(passwd.encode('utf-8'))
         encpwd = md5.hexdigest()
         # Preparing data to be stored
-        data = [nick, encpwd, mail, ccard, random.randint(0, 100)]
+        ####### data = [nick, encpwd, mail, ccard, random.randint(0, 100)]
+        data = {'nickname': nick, 'password': encpwd, 'mail': mail, 'ccard': ccard, 'cash': random.randint(0, 100), 'cart':[]}
         # Writing user data file
         slug_nick = nick.lower()
         os.mkdir(os.path.join(app.root_path, USERS_FOLDER, slug_nick))
@@ -125,20 +136,107 @@ def login():
         encpwd = md5.hexdigest()
         with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, DATA_FILE), 'rb') as file:
             userdata = pickle.load(file)
-        if encpwd != userdata[PASS_IDX]:
+        if encpwd != userdata['password']:
             flash('Contraseña incorrecta')
             return render_template('login.html')
         # Sessions
-        session['nickname'] = userdata[NICK_IDX]
-        session['mail'] = userdata[MAIL_IDX]
-        session['ccard'] = userdata[CCARD_IDX]
-        session['cash'] = userdata[CASH_IDX]
+        session['nickname'] = userdata['nickname']
+        session['mail'] = userdata['mail']
+        session['ccard'] = userdata['ccard']
+        session['cash'] = userdata['cash']
+        if session.get('cart'):
+            session['cart'] += userdata['cart']
+        else:
+            session['cart'] = userdata['cart']
 
+        # DEBUG:
+        print(session['cash'])
         return redirect(url_for('index'))
     else:
         return render_template('login.html')
 
+
+
+def _update_userdata(*argv):
+    slug_nick = session['nickname'].lower()
+    # Reading userdata
+    with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, DATA_FILE), 'rb') as file:
+        userdata = pickle.load(file)
+    # Updating
+    for arg in argv:
+        userdata[arg] = session[arg]
+        userdata[arg] = session[arg]
+    # Storing updates
+    with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, DATA_FILE), 'wb') as file:
+        pickle.dump(userdata, file)
+
+
 @app.route('/logout', methods=['POST'])
 def logout():
+    # Storing current cart data into user data file
+    _update_userdata('cash', 'cart')
+    # Deleting user data at current session
     session.pop('nickname', None)
+    # Deleting cart data in case another user logs in
+    session.pop('cart', None)
+    return redirect(url_for('index'))
+
+
+@app.route('/cart', methods=['GET', 'POST'])
+def cart():
+    total = 0
+    if not session.get('cart'):
+        session['cart'] = []
+
+    if request.method == 'POST':
+        prod_id = request.form.get('prod_id')
+        session['cart'].remove(int(prod_id))
+
+    with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
+        catalogue = json.loads(data_file.read())
+        films = catalogue['peliculas']
+        films = list(filter(lambda f: int(f['id']) in session['cart'], films))
+
+    for f in films:
+        total += f['precio']
+
+    total = round(total, 2)
+
+    return render_template('cart.html', films=films, total=total)
+
+
+@app.route('/purchase', methods=['POST'])
+def purchase():
+    if not session.get('nickname'):
+        return redirect(url_for('login'))
+
+    slug_nick = session['nickname'].lower()
+    total = 0
+    if not session.get('cart'):
+        session['cart'] = []
+
+    with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
+        catalogue = json.loads(data_file.read())
+        films = catalogue['peliculas']
+        films = list(filter(lambda f: int(f['id']) in session['cart'], films))
+
+    for f in films:
+        total += f['precio']
+
+    if session['cash'] >= total:
+        session['cash'] -= total
+
+        with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), encoding="utf-8") as data_file:
+            history = json.loads(data_file.read())
+
+        history['historial'].extend([{'id': f['id'], 'date': DATE, 'address': ADDR, 'price': f['precio']} for f in films])
+
+        with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), 'w') as file:
+            json.dump(history, file)
+
+        session['cart'] = []
+        _update_userdata('cart', 'cash')
+
+    # TODO: Notificar con else al usuario de que no tiene saldo
+
     return redirect(url_for('index'))

@@ -27,7 +27,15 @@
                     Año: {{ film.anio }} | Director: {{ film.director }} | Duración: {{ film.duracion }}
                 </div>
                 <h2 class="price-tag"> {{ film.precio }} </h2>
-                <button class="product-button" type="button" name="buy">Añadir a la cesta</button>
+                {% if film.id in session['cart'] %}
+                    <form action="#" method="get">
+                        <input type="submit" name="submit" value="En la cesta" class="product-button">
+                    </form>
+                {% else %}
+                    <form action="{{ url_for('product', id=film.id)}}" method="post">
+                        <input type="submit" name="submit" value="Añadir a la cesta" class="product-button">
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>
