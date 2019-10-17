@@ -156,7 +156,6 @@ def login():
         return render_template('login.html')
 
 
-
 def _update_userdata(*argv):
     slug_nick = session['nickname'].lower()
     # Reading userdata
@@ -240,3 +239,27 @@ def purchase():
     # TODO: Notificar con else al usuario de que no tiene saldo
 
     return redirect(url_for('index'))
+
+
+@app.route('/history', methods=['GET'])
+def history():
+    if not session.get('nickname'):
+        return redirect(url_for('login'))
+
+    slug_nick = session.get('nickname').lower()
+
+    with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), encoding="utf-8") as data_file:
+        history = json.loads(data_file.read())
+        history = history['historial']
+
+    with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
+        catalogue = json.loads(data_file.read())
+        films = catalogue['peliculas']
+
+    for dh in history:
+        for df in films:
+            if dh['id'] == df['id']:
+                dh.update(df)
+                break
+
+    return render_template('history.html', history=history)
