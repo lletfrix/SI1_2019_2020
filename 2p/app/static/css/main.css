@@ -301,8 +301,19 @@ input:focus{
 .register-button {
     padding: 1rem 2vw 1rem 2vw;
     margin: 1rem 0;
-    ;
     text-decoration: none;
+}
+
+.purchase-button {
+    max-width: fit-content;
+    background-color: #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #446;
+    font-weight: bold;
+    border: 0;
+    padding: 1rem 2vw;
+    font-size: larger;
 }
 
 .product-cover {
@@ -318,9 +329,14 @@ input:focus{
     box-shadow: 0 0 1em #222;
 }
 
+.history-container {
+    padding: 0 2vw;
+}
+
 .history-cover {
     max-height: 8rem;
     object-fit: cover;
+    margin-right: 2vw;
 }
 
 .history-price, .history-info {
@@ -362,4 +378,35 @@ input:focus{
 .alert-warning {
     background-color: BlanchedAlmond;
     color: GoldenRod;
+}
+
+.delete-button {
+    max-width: fit-content;
+    border-color: #ee5e68;
+    background-color: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ee5e68;
+    font-weight: bold;
+    border: 1;
+    padding: 0.5rem 1vw;
+    font-size: larger;
+}
+
+.buy-totals {
+    display: flex;
+    justify-content: center;
+}
+
+.add-to-cart-button {
+    background-color: transparent;
+    margin-left: 5vw;
+    max-width: fit-content;
+    border-color: orange;
+    border-radius: 6px;
+    cursor: pointer;
+    color: orange;
+    font-weight: bold;
+    padding: 1rem 2vw;
+    font-size: larger;
 }
