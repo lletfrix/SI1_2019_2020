@@ -417,3 +417,8 @@ input:focus{
     color: #ddd;
     font-weight: bold;
 }
+
+.amount-input {
+    max-width: 10vw;
+    margin-left: 5vw;
+}

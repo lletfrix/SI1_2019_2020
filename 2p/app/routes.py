@@ -9,6 +9,7 @@ import sys
 import random
 import pickle
 import hashlib
+from datetime import date
 
 USERS_FOLDER = 'usuarios'
 DATA_FILE = 'datos.dat'
@@ -61,9 +62,12 @@ def product(id):
 
     if request.method == 'POST':
         if session.get('cart'):
-            session['cart'].append(int(id))
+            session['cart'][int(id)] = int(request.form.get('amount'))
+
+            if(int(request.form.get('amount')) == 0):
+                session['cart'].pop(int(id), None)
         else:
-            session['cart'] = [int(id)]
+            session['cart'] = {int(id): int(request.form.get('amount'))}
 
     return render_template('product.html', title=film['titulo'], film=film)
 
@@ -93,7 +97,7 @@ def register():
         encpwd = md5.hexdigest()
         # Preparing data to be stored
         ####### data = [nick, encpwd, mail, ccard, random.randint(0, 100)]
-        data = {'nickname': nick, 'password': encpwd, 'mail': mail, 'ccard': ccard, 'address': addr, 'cash': random.randint(0, 100), 'cart':[]}
+        data = {'nickname': nick, 'password': encpwd, 'mail': mail, 'ccard': ccard, 'address': addr, 'cash': random.randint(0, 100), 'cart':{}}
         # Writing user data file
         slug_nick = nick.lower()
         os.mkdir(os.path.join(app.root_path, USERS_FOLDER, slug_nick))
@@ -142,7 +146,9 @@ def login():
         session['cash'] = userdata['cash']
         session['address'] = userdata['address']
         if session.get('cart'):
-            session['cart'] += userdata['cart']
+            ### DEBUG PLS
+            userdata['cart'].update(session['cart'])
+            session['cart'].update(userdata['cart'])
         else:
             session['cart'] = userdata['cart']
         #########################################################
@@ -182,19 +188,20 @@ def logout():
 def cart():
     total = 0
     if not session.get('cart'):
-        session['cart'] = []
+        session['cart'] = {}
 
     if request.method == 'POST':
         prod_id = request.form.get('prod_id')
-        session['cart'].remove(int(prod_id))
+        session['cart'].pop(int(prod_id), None)
 
     with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
         catalogue = json.loads(data_file.read())
         films = catalogue['peliculas']
-        films = list(filter(lambda f: int(f['id']) in session['cart'], films))
+        films = list(filter(lambda f: int(f['id']) in session['cart'].keys(), films))
 
     for f in films:
-        total += f['precio']
+        f['amount'] = session['cart'][f['id']]
+        total += f['precio']*f['amount']
 
     total = round(total, 2)
 
@@ -209,15 +216,16 @@ def purchase():
     slug_nick = session['nickname'].lower()
     total = 0
     if not session.get('cart'):
-        session['cart'] = []
+        session['cart'] = {}
 
     with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
         catalogue = json.loads(data_file.read())
         films = catalogue['peliculas']
-        films = list(filter(lambda f: int(f['id']) in session['cart'], films))
+        films = list(filter(lambda f: int(f['id']) in session['cart'].keys(), films))
 
     for f in films:
-        total += f['precio']
+        f['amount'] = session['cart'][f['id']]
+        total += f['precio']*f['amount']
 
     if session['cash'] >= total:
         session['cash'] -= total
@@ -226,12 +234,12 @@ def purchase():
         with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), encoding="utf-8") as data_file:
             history = json.loads(data_file.read())
 
-        history['historial'].extend([{'id': f['id'], 'date': DATE, 'address': ADDR, 'price': f['precio']} for f in films])
+        history['historial'].extend([{'id': f['id'], 'date': date.today().strftime("%d-%b-%Y"), 'address': session['address'], 'price': f['precio'], 'amount': f['amount']} for f in films])
 
         with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), 'w') as file:
             json.dump(history, file)
 
-        session['cart'] = []
+        session['cart'] = {}
         _update_userdata('cart', 'cash')
 
     # TODO: Notificar con else al usuario de que no tiene saldo
