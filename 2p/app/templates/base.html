@@ -59,7 +59,7 @@
                 </div>
                 <div class="option-container">
                     <div class="menu-option">
-                        <a href="#">PERFIL</a>
+                        <a href="{{ url_for('profile') }}">PERFIL</a>
                     </div>
                     <div class="menu-option">
                         <a href="{{ url_for('history') }}">HISTORIAL</a>
@@ -68,7 +68,7 @@
                         <a href="{{ url_for('cart') }}">CARRITO<i class="material-icons">shopping_cart</i></a>
                     </div>
                     <div class="menu-option">
-                        <a href="#">CONFIGURACIÓN</a>
+                        <a href="{{ url_for('profile') }}" style="color: orange;">SALDO: {{ session['cash'] }}€</a>
                     </div>
                 </div>
             {% endif %}

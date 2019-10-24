@@ -11,11 +11,6 @@ import pickle
 import hashlib
 
 USERS_FOLDER = 'usuarios'
-NICK_IDX = 0
-PASS_IDX = 1
-MAIL_IDX = 2
-CCARD_IDX = 3
-CASH_IDX = 4
 DATA_FILE = 'datos.dat'
 HIST_FILE = 'historial.json'
 CATALOGUE_FILE = 'catalogue/catalogo.json'
@@ -81,8 +76,9 @@ def register():
         passwd = request.form.get('password')
         mail = request.form.get('mail')
         ccard = request.form.get('ccard')
+        addr = request.form.get('address')
         # Validate fields
-        if not (nick and passwd and mail and ccard):
+        if not (nick and passwd and mail and ccard and addr):
             flash('Por favor, rellene todos los campos')
             return render_template('register.html')
         # Check user is available
@@ -97,7 +93,7 @@ def register():
         encpwd = md5.hexdigest()
         # Preparing data to be stored
         ####### data = [nick, encpwd, mail, ccard, random.randint(0, 100)]
-        data = {'nickname': nick, 'password': encpwd, 'mail': mail, 'ccard': ccard, 'cash': random.randint(0, 100), 'cart':[]}
+        data = {'nickname': nick, 'password': encpwd, 'mail': mail, 'ccard': ccard, 'address': addr, 'cash': random.randint(0, 100), 'cart':[]}
         # Writing user data file
         slug_nick = nick.lower()
         os.mkdir(os.path.join(app.root_path, USERS_FOLDER, slug_nick))
@@ -144,11 +140,12 @@ def login():
         session['mail'] = userdata['mail']
         session['ccard'] = userdata['ccard']
         session['cash'] = userdata['cash']
+        session['address'] = userdata['address']
         if session.get('cart'):
             session['cart'] += userdata['cart']
         else:
             session['cart'] = userdata['cart']
-
+        #########################################################
         # DEBUG:
         print(session['cash'])
         return redirect(url_for('index'))
@@ -173,7 +170,7 @@ def _update_userdata(*argv):
 @app.route('/logout', methods=['POST'])
 def logout():
     # Storing current cart data into user data file
-    _update_userdata('cash', 'cart')
+    _update_userdata('cash', 'cart', 'address')
     # Deleting user data at current session
     session.pop('nickname', None)
     # Deleting cart data in case another user logs in
@@ -224,6 +221,7 @@ def purchase():
 
     if session['cash'] >= total:
         session['cash'] -= total
+        session['cash'] = round(session['cash'], 2)
 
         with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), encoding="utf-8") as data_file:
             history = json.loads(data_file.read())
@@ -263,3 +261,22 @@ def history():
                 break
 
     return render_template('history.html', history=history)
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if not session.get('nickname'):
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        if request.form.get('address'):
+            session['address'] = request.form.get('address')
+
+        elif request.form.get('cash'):
+            try:
+                session['cash'] += float(request.form.get('cash'))
+                session['cash'] = round(session['cash'], 2)
+            except ValueError:
+                flash('Por favor, introduzca un valor válido para el saldo')
+
+    return render_template('profile.html')

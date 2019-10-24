@@ -410,3 +410,10 @@ input:focus{
     padding: 1rem 2vw;
     font-size: larger;
 }
+
+.input-title {
+    margin-right: auto;
+    padding-left: 0.7vw;
+    color: #ddd;
+    font-weight: bold;
+}
