@@ -15,7 +15,10 @@
         <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Space+Mono:400,700&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='js/ajax_users.js') }}"></script>
         <title>DViDeo - {% block title_block %}{% endblock %}</title>
+        {% block script_block %}{% endblock %}
     </head>
     <body>
 
@@ -29,8 +32,11 @@
             </div>
             {% if session['nickname'] %}
             <form class="login-panel-container" action="{{ url_for('logout') }}" method="post">
+                <div id="users" class="number_users"></div>
                 <input type="submit" name="submit" value="Cerrar Sesión">
             </form>
+            {% else %}
+            <div id="users" class="number_users"></div>
             {% endif %}
         </header>
 

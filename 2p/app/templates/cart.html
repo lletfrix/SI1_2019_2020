@@ -5,6 +5,13 @@
 {% endblock %}
 
 {% block content_block %}
+
+{% for message in get_flashed_messages() %}
+<div class="alert alert-warning">
+    {{ message }}
+</div>
+{% endfor %}
+
 <div class="history-container">
     <span class="history-title">Cesta</span>
 

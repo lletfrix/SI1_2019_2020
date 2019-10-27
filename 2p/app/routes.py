@@ -241,10 +241,11 @@ def purchase():
 
         session['cart'] = {}
         _update_userdata('cart', 'cash')
+        return redirect(url_for('index'))
 
-    # TODO: Notificar con else al usuario de que no tiene saldo
-
-    return redirect(url_for('index'))
+    else:
+        flash('No dispone de saldo para esta compra.')
+        return redirect(url_for('cart'));
 
 
 @app.route('/history', methods=['GET'])
@@ -288,3 +289,7 @@ def profile():
                 flash('Por favor, introduzca un valor válido para el saldo')
 
     return render_template('profile.html')
+
+@app.route('/connectedusers', methods=['GET'])
+def connectedusers():
+    return str(random.randint(10, 1000))
