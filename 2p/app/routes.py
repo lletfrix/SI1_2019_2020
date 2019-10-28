@@ -9,6 +9,7 @@ import sys
 import random
 import pickle
 import hashlib
+from collections import OrderedDict
 from datetime import date
 
 USERS_FOLDER = 'usuarios'
@@ -61,6 +62,9 @@ def product(id):
         film = list(filter(lambda f: f['id'] == int(id), films))[0]
 
     if request.method == 'POST':
+        if int(request.form.get('amount')) < 0:
+            return render_template('product.html', title=film['titulo'], film=film)
+
         if session.get('cart'):
             session['cart'][int(id)] = int(request.form.get('amount'))
 
@@ -248,6 +252,15 @@ def purchase():
         return redirect(url_for('cart'));
 
 
+def _cmp_dates(date):
+    # Format is dd-mmm-yyyy
+    months = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06',
+              'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'}
+    d = date[:2]
+    m = months[date[3:6]]
+    y = date[7:]
+    return int(y+m+d)
+
 @app.route('/history', methods=['GET'])
 def history():
     if not session.get('nickname'):
@@ -269,7 +282,15 @@ def history():
                 dh.update(df)
                 break
 
-    return render_template('history.html', history=history)
+    dates = [f['date'] for f in history]
+    dates.sort(key=_cmp_dates, reverse=True)
+    grouped_history = OrderedDict()
+    for date in dates:
+        grouped_history[date] = []
+    for f in history:
+        grouped_history[f['date']].append(f)
+
+    return render_template('history.html', history=grouped_history)
 
 
 @app.route('/profile', methods=['GET', 'POST'])

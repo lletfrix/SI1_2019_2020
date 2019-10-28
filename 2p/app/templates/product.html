@@ -29,12 +29,12 @@
                 <h2 class="price-tag"> {{ film.precio }} </h2>
                 {% if film.id in session['cart'] %}
                     <form action="{{ url_for('product', id=film.id)}}" method="post">
-                        <input class="amount-input" type="number" name="amount" value="{{ session['cart'][film.id] }}">
+                        <input class="amount-input" type="number" name="amount" min=0 value="{{ session['cart'][film.id] }}">
                         <input type="submit" name="submit" value="Actualizar cantidad" class="add-to-cart-button">
                     </form>
                 {% else %}
                     <form action="{{ url_for('product', id=film.id)}}" method="post">
-                        <input class="amount-input" type="number" name="amount" value="1">
+                        <input class="amount-input" type="number" name="amount" min=0 value="1">
                         <input type="submit" name="submit" value="Añadir a la cesta" class="add-to-cart-button">
                     </form>
                 {% endif %}

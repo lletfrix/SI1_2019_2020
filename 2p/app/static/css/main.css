@@ -12,6 +12,13 @@
   padding: 0;
   box-sizing: border-box;
   font-family: Nunito;
+  overflow: -moz-scrollbars-none;
+  -ms-overflow-style: none;
+}
+
+::-webkit-scrollbar {
+    width: 0px;  /* Remove scrollbar space */
+    background: transparent;  /* Optional: just make scrollbar invisible */
 }
 
 body {
@@ -456,4 +463,13 @@ input:focus{
 
 .number_users {
     align-self: center;
+}
+
+.collapse{
+    visibility: collapse;
+}
+
+.history-button {
+    max-width: fit-content;
+    max-height: fit-content;
 }
