@@ -16,22 +16,26 @@
 </div>
 {% endfor %}
 
-<form id="register_form" class="form-container" action="{{ url_for('register') }}" method="post">
+<form id="register_form" class="form-container" action="{{ url_for('register') }}" method="post" enctype = "multipart/form-data">
     <div class="name-input">
-        <input id="nickname_register" type="text" name="nickname" placeholder="Nombre">
+        <input id="nickname_register" type="text" name="nickname" placeholder="Nombre (*)">
     </div>
     <div class="pass-input">
-        <input id="password_register" type="password" name="password" placeholder="Contraseña">
+        <input id="password_register" type="password" name="password" placeholder="Contraseña (*)">
         <div id="progress_bar" class="progress_bar"></div>
     </div>
     <div class="mail-input">
-        <input id="mail_register" type="email" name="mail" placeholder="Correo electrónico">
+        <input id="mail_register" type="email" name="mail" placeholder="Correo electrónico (*)">
     </div>
     <div class="address-input">
-        <input id="address_register" type="text" name="address" placeholder="Dirección">
+        <input id="address_register" type="text" name="address" placeholder="Dirección (*)">
     </div>
     <div class="name-input">
-        <input id="ccard_register" type="text" name="ccard" maxlength="12" placeholder="Tarjeta de crédito">
+        <input id="ccard_register" type="text" name="ccard" maxlength="12" placeholder="Tarjeta de crédito (*)">
+    </div>
+    <div class="photo-input">
+        Foto de perfil:
+        <input type="file" name="file" style="border: none;">
     </div>
     <input class="register-button" type="submit" name="submit" value="Registro">
 </form>

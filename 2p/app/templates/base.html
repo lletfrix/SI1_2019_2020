@@ -56,9 +56,15 @@
                 </div>
             {% else %}
                 <div class="user-container">
+                    {% if session['photo'] %}
+                    <div class="user-image">
+                        <img src="../static/img/{{ session['slug_nick'] }}/avatar.jpg" alt="avatar">
+                    </div>
+                    {% else %}
                     <div class="user-image">
                         <img src="../static/img/profile.jpg" alt="kermit the frog">
                     </div>
+                    {% endif %}
                     <div class="username">
                         {{ session['nickname'] }}
                     </div>

@@ -473,3 +473,10 @@ input:focus{
     max-width: fit-content;
     max-height: fit-content;
 }
+
+.photo-input {
+    color: #ddd;
+    display: flex;
+    flex-direction: column;
+    padding-left: 15px;
+}

@@ -16,9 +16,8 @@ USERS_FOLDER = 'usuarios'
 DATA_FILE = 'datos.dat'
 HIST_FILE = 'historial.json'
 CATALOGUE_FILE = 'catalogue/catalogo.json'
-DATE = '10/10/2019'
-ADDR = 'C/Erasmo de Rotterdam'
-
+PHOTO_FILE = 'avatar.jpg'
+STATIC_IMG = 'static/img'
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index.html', methods=['GET', 'POST'])
@@ -87,7 +86,7 @@ def register():
         addr = request.form.get('address')
         # Validate fields
         if not (nick and passwd and mail and ccard and addr):
-            flash('Por favor, rellene todos los campos')
+            flash('Por favor, rellene todos los campos obligatorios')
             return render_template('register.html')
         # Check user is available
         users = next(os.walk(os.path.join(app.root_path, USERS_FOLDER)))[1]
@@ -111,6 +110,11 @@ def register():
         with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), 'w') as file:
             history = {'historial': []}
             json.dump(history, file)
+
+        f = request.files.get('file')
+        if (f):
+            os.mkdir(os.path.join(app.root_path, STATIC_IMG, slug_nick))
+            f.save(os.path.join(app.root_path, STATIC_IMG, slug_nick, PHOTO_FILE))
 
         return redirect(url_for('index'))
     else:
@@ -149,15 +153,15 @@ def login():
         session['ccard'] = userdata['ccard']
         session['cash'] = userdata['cash']
         session['address'] = userdata['address']
+        session['slug_nick'] = slug_nick
+        session['photo'] = os.path.isfile(os.path.join(app.root_path, STATIC_IMG, slug_nick, PHOTO_FILE))
+
         if session.get('cart'):
             ### DEBUG PLS
             userdata['cart'].update(session['cart'])
             session['cart'].update(userdata['cart'])
         else:
             session['cart'] = userdata['cart']
-        #########################################################
-        # DEBUG:
-        print(session['cash'])
         return redirect(url_for('index'))
     else:
         return render_template('login.html')
