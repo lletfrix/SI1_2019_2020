@@ -164,7 +164,8 @@ def login():
             session['cart'] = userdata['cart']
         return redirect(url_for('index'))
     else:
-        return render_template('login.html')
+        last_nick = request.cookies.get('last_nickname')
+        return render_template('login.html', last_nick=last_nick)
 
 
 def _update_userdata(*argv):
@@ -185,11 +186,13 @@ def _update_userdata(*argv):
 def logout():
     # Storing current cart data into user data file
     _update_userdata('cash', 'cart', 'address')
+    resp = redirect(url_for('index'))
+    resp.set_cookie('last_nickname', session['nickname'])
     # Deleting user data at current session
     session.pop('nickname', None)
     # Deleting cart data in case another user logs in
     session.pop('cart', None)
-    return redirect(url_for('index'))
+    return resp
 
 
 @app.route('/cart', methods=['GET', 'POST'])
