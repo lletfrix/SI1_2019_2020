@@ -16,7 +16,7 @@
     <div class="product-container">
         <span class="film-title">{{ film.titulo }}</span>
         <div class="product-info-container">
-            <img class="product-cover" src="../static/img/{{ film.poster }}" alt="{{ film.titulo }}">
+            <img class="product-cover" src={{ url_for('static', filename='img/'~film.poster) }} alt="{{ film.titulo }}">
             <div class="product-info">
                 <div class="product-sinopsis">
                     <h3>Sinopsis</h3>

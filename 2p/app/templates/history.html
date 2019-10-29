@@ -22,7 +22,7 @@
             <tr> <td class="buy-subtitle"> {{ date }} </td> <td> <input type="button" id="button-{{ date }}" name="show-group" value="Ocultar" class="history-button"> </td></tr>
             {% for dh in history[date] %}
             <tr class="history-product-info">
-                <td><img class="history-cover" src="../static/img/{{ dh.poster }}" alt="{{ dh.titulo }}"></td>
+                <td><img class="history-cover" src={{ url_for('static', filename='img/'~dh.poster) }} alt="{{ dh.titulo }}"></td>
                 <td>
                     <div class="history-info">
                         <span class="buy-title">{{ dh.titulo }}</span>

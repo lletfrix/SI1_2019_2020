@@ -35,7 +35,7 @@
         {% for film in films %}
             <div class="cover-container">
                 <a href="{{ url_for('product', id=film.id) }}">
-                    <img class="cover" src="../static/img/{{ film.poster }}" alt="{{ film.titulo }}">
+                    <img class="cover" src={{ url_for('static', filename='img/'~film.poster) }} alt="{{ film.titulo }}">
                     <span class="cover-title">{{ film.titulo }}</span>
                 </a>
             </div>

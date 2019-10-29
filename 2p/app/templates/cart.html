@@ -19,7 +19,7 @@
         <tbody>
             {% for film in films %}
             <tr>
-                <td><img class="history-cover" src="../static/img/{{ film.poster }}" alt="{{ film.titulo }}"></td>
+                <td><img class="history-cover" src={{ url_for('static', filename='img/'~film.poster) }} alt="{{ film.titulo }}"></td>
                 <td>
                     <div class="history-info">
                         <span class="buy-title">{{ film.titulo }}</span>
