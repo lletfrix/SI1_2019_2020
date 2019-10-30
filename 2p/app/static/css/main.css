@@ -337,7 +337,7 @@ input:focus{
 }
 
 .history-container {
-    padding: 0 0 0 2vw;
+    padding: 0 2vw 0 2vw;
 }
 
 .history-cover {
