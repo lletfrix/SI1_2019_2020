@@ -37,7 +37,7 @@ body {
 
 .product-container {
     padding-right: 15vw;
-    padding-left: 20vw;
+    padding-left: 5vw;
 }
 
 .form-container {
@@ -337,7 +337,7 @@ input:focus{
 }
 
 .history-container {
-    padding: 0 0 0 17vw;
+    padding: 0 0 0 2vw;
 }
 
 .history-cover {
