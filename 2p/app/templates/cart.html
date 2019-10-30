@@ -28,7 +28,7 @@
                 <td>
                     <div class="history-price">
                         <span class="buy-title">{{film.amount}} x {{ film.precio }}€</span>
-                        <form action="{{ url_for('cart') }}" method="post">
+                        <form action="{{ url_for('cart') }}" method="post" class="delete-form">
                             <input type="hidden" name="prod_id" value={{ film.id }}>
                             <input class="delete-button" type="submit" name="submit" value="Eliminar">
                         </form>

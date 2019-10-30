@@ -2,7 +2,7 @@ $(document).ready(function () {
     function getUsers(){
         $.ajax({
             type: 'GET',
-            url: "./connectedusers",
+            url: "/connectedusers",
             success:
                 function(data){
                     data = 'Usuarios: ' + data;
