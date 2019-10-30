@@ -337,7 +337,7 @@ input:focus{
 }
 
 .history-container {
-    padding: 0 0 0 17vw;
+    padding: 0 2vw 0 2vw;
 }
 
 .history-cover {
@@ -350,12 +350,17 @@ input:focus{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 5rem;
-    min-width: 25vw;
+    /* height: 5rem;
+    min-width: 25vw; */
+}
+
+.history-info {
+  overflow: hidden;
 }
 
 .history-price {
     align-items: flex-end;
+    overflow: visible;
 }
 
 .buy-title{
@@ -481,6 +486,8 @@ input:focus{
     color: #DDD;
     border: none;
     overflow: visible;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .photo-input {
@@ -494,4 +501,9 @@ input:focus{
     color: orange;
     margin-left: 10px;
     font-family: monospace;
+}
+
+.delete-form {
+  width: 10vw;
+  overflow: visible;
 }
