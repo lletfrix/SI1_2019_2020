@@ -176,6 +176,9 @@ def logout():
 
 @app.route('/product/<id>', methods=['GET', 'POST'])
 def product(id):
+    if id == 'connectedusers':
+        return redirect(url_for('connectedusers'))
+        
     with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
         catalogue = json.loads(data_file.read())
         films = catalogue['peliculas']
