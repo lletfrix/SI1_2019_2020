@@ -15,7 +15,7 @@ $(document).ready( function() {
 
 
     const ccard_is_valid = (ccard) => {
-        var regex = /[0-9]{12,}/;
+        var regex = /[0-9]{16,}/;
         var is_valid = regex.test(ccard);
         return is_valid;
     };
@@ -23,11 +23,14 @@ $(document).ready( function() {
 
     $('#nickname_register').on('input', function (){
         var nickname = $(this);
+        var info_message = $('#nick-require');
         is_valid = name_is_valid(nickname.val());
         if (is_valid) {
             nickname.removeClass("error").addClass("ok");
+            info_message.text("");
         }else{
             nickname.removeClass("ok").addClass("error");
+            info_message.text("· 6 caracteres como mínimo");
         }
     });
 
@@ -38,22 +41,32 @@ $(document).ready( function() {
         var strength = 0;
         var caps = /[A-Z]/;
         var number = /[0-9]/;
+        var info_message = $('#pass-require');
 
         if (pass.val().match(caps)) {
+            console.log('Tengo mayusculas');
             strength += 1;
         }
         if (pass.val().match(number)) {
+            console.log('Tengo numeros');
             strength += 1;
         }
 
-        if(strength === 0 || !pass_is_valid(pass.val())){
-            progress_bar.removeClass('mid_strength').removeClass('high_strength').addClass('low_strength');
+        if (pass.val().length === 0 || !pass_is_valid(pass.val())) {
+            progress_bar.removeClass('mid_strength').removeClass('high_strength').removeClass('low_strength').addClass('no_bar');
+            info_message.text("· 6 caracteres como mínimo");
+        }
+        else if(strength === 0){
+            progress_bar.removeClass('no_bar').removeClass('mid_strength').removeClass('high_strength').addClass('low_strength');
+            info_message.text("");
         }
         else if(strength === 1){
-            progress_bar.removeClass('low_strength').removeClass('high_strength').addClass('mid_strength');
+            progress_bar.removeClass('no_bar').removeClass('low_strength').removeClass('high_strength').addClass('mid_strength');
+            info_message.text("");
         }
         else if(strength >= 2){
-            progress_bar.removeClass('low_strength').removeClass('mid_strength').addClass('high_strength');
+            progress_bar.removeClass('no_bar').removeClass('low_strength').removeClass('mid_strength').addClass('high_strength');
+            info_message.text("");
         }
     });
 
