@@ -443,7 +443,12 @@ input:focus{
     border-radius: 0.15rem;
     min-height: 0.3rem;
     margin-right: 10px;
-    margin-top: -5px;
+    transition: background-color linear 0.3s;
+    transition: max-width linear 0.3s;
+}
+
+.no_bar {
+    max-width: 0%;
 }
 
 .low_strength {
@@ -483,4 +488,10 @@ input:focus{
     display: flex;
     flex-direction: column;
     padding-left: 15px;
+}
+
+.register-require {
+    color: orange;
+    margin-left: 10px;
+    font-family: monospace;
 }
