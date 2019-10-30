@@ -1,7 +1,7 @@
 $(document).ready( function() {
 
     const name_is_valid = (name) => {
-        var regex = /[0-9A-Za-z].{5,}/;
+        var regex = /^[0-9A-Za-z].{5,}/;
         var is_valid = regex.test(name);
         return is_valid;
     };
