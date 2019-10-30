@@ -19,6 +19,7 @@ CATALOGUE_FILE = 'catalogue/catalogo.json'
 PHOTO_FILE = 'avatar.jpg'
 STATIC_IMG = 'static/img'
 
+
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index.html', methods=['GET', 'POST'])
 def index():
@@ -51,28 +52,6 @@ def index():
             films = sorted(films, key=(lambda m : m['anio']), reverse=True)[:10]
 
         return render_template('index.html', title='Home', films=films, search_query=None)
-
-
-@app.route('/product/<id>', methods=['GET', 'POST'])
-def product(id):
-    with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
-        catalogue = json.loads(data_file.read())
-        films = catalogue['peliculas']
-        film = list(filter(lambda f: f['id'] == int(id), films))[0]
-
-    if request.method == 'POST':
-        if int(request.form.get('amount')) < 0:
-            return render_template('product.html', title=film['titulo'], film=film)
-
-        if session.get('cart'):
-            session['cart'][int(id)] = int(request.form.get('amount'))
-
-            if(int(request.form.get('amount')) == 0):
-                session['cart'].pop(int(id), None)
-        else:
-            session['cart'] = {int(id): int(request.form.get('amount'))}
-
-    return render_template('product.html', title=film['titulo'], film=film)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -195,6 +174,28 @@ def logout():
     return resp
 
 
+@app.route('/product/<id>', methods=['GET', 'POST'])
+def product(id):
+    with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
+        catalogue = json.loads(data_file.read())
+        films = catalogue['peliculas']
+        film = list(filter(lambda f: f['id'] == int(id), films))[0]
+
+    if request.method == 'POST':
+        if int(request.form.get('amount')) < 0:
+            return render_template('product.html', title=film['titulo'], film=film)
+
+        if session.get('cart'):
+            session['cart'][int(id)] = int(request.form.get('amount'))
+
+            if(int(request.form.get('amount')) == 0):
+                session['cart'].pop(int(id), None)
+        else:
+            session['cart'] = {int(id): int(request.form.get('amount'))}
+
+    return render_template('product.html', title=film['titulo'], film=film)
+
+
 @app.route('/cart', methods=['GET', 'POST'])
 def cart():
     total = 0
@@ -268,6 +269,7 @@ def _cmp_dates(date):
     y = date[7:]
     return int(y+m+d)
 
+
 @app.route('/history', methods=['GET'])
 def history():
     if not session.get('nickname'):
@@ -317,6 +319,7 @@ def profile():
                 flash('Por favor, introduzca un valor válido para el saldo')
 
     return render_template('profile.html')
+
 
 @app.route('/connectedusers', methods=['GET'])
 def connectedusers():
