@@ -1,0 +1,6 @@
+*.pyc
+clean_fakedb.py
+clean_db.sh
+clean_sessions.sh
+1401_*
+example-*
