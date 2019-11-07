@@ -7,6 +7,7 @@
 --  Project: Computer Systems I Assignments
 -------------------------------------------------------------------------
 
+
 -------------------------------------------------------------------------
 -- ADDING PRIMARY KEYS AND FOREIGN KEYS
 
@@ -80,6 +81,7 @@ ON DELETE CASCADE;
 ALTER TABLE orderdetail
 ADD CONSTRAINT imdb_prod_id_fkey
 FOREIGN KEY (prod_id) REFERENCES products(prod_id); -- no action
+-------------------------------------------------------------------------
 
 
 -------------------------------------------------------------------------
@@ -110,29 +112,149 @@ DROP TABLE inventory;
 
 
 -------------------------------------------------------------------------
+-- IMPROVING RELATIONS OF MULTIVALUED ATTRIBUTES
+
+-- IMDB_MOVIELANGUAGES
+-- Creating new languages table
 CREATE TABLE public.languages(
     language_id integer PRIMARY KEY NOT NULL,
     language character varying(32) NOT NULL
 );
-
-CREATE SEQUENCE public.languages_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
-
 ALTER TABLE public.languages OWNER TO alumnodb;
-ALTER TABLE public.languages_seq OWNER TO alumnodb;
-ALTER SEQUENCE public.languages_seq OWNED BY public.languages.language_id;
-ALTER TABLE ONLY public.languages ALTER COLUMN languague_id SET DEFAULT nextval('languages:seq'::regclass);
 
+-- Creating sequence of the id (PK) before inserting
+CREATE SEQUENCE public.languages_language_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER TABLE public.languages_language_id_seq OWNER TO alumnodb;
+
+ALTER SEQUENCE public.languages_language_id_seq OWNED BY public.languages.language_id;
+
+ALTER TABLE ONLY public.languages ALTER COLUMN language_id SET DEFAULT nextval('public.languages_language_id_seq'::regclass);
+
+-- Inserting languages
 INSERT INTO public.languages(language)
-SELECT DISTINCT languages
-FROM public.imdb_movielangue;
+SELECT DISTINCT language
+FROM public.imdb_movielanguages;
 
-ALTER
+-- Adding new language_id column
+ALTER TABLE public.imdb_movielanguages
+ADD COLUMN language_id integer;
+
+-- Updating column with languages ids
+UPDATE imdb_movielanguages
+SET language_id=languages.language_id
+FROM languages
+WHERE imdb_movielanguages.language=languages.language;
+
+-- Deleting column with languages strings
+ALTER TABLE imdb_movielanguages
+DROP COLUMN language;
+
+-- Setting up new PK's and FK's
+ALTER TABLE ONLY public.imdb_movielanguages
+ADD CONSTRAINT imdb_movielanguages_pkey PRIMARY KEY (movieid, language_id);
+
+ALTER TABLE ONLY public.imdb_movielanguages
+ADD CONSTRAINT imdb_movielanguages_language_id_fkey FOREIGN KEY (language_id) REFERENCES public.languages(language_id);
 
 
+-- IMDB_MOVIECOUNTRIES
+-- Creating new countries table
+CREATE TABLE public.countries(
+    country_id integer PRIMARY KEY NOT NULL,
+    country character varying(32) NOT NULL
+);
+ALTER TABLE public.countries OWNER TO alumnodb;
+
+-- Creating sequence of the id (PK) before inserting
+CREATE SEQUENCE public.countries_country_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER TABLE public.countries_country_id_seq OWNER TO alumnodb;
+
+ALTER SEQUENCE public.countries_country_id_seq OWNED BY public.countries.country_id;
+
+ALTER TABLE ONLY public.countries ALTER COLUMN country_id SET DEFAULT nextval('public.countries_country_id_seq'::regclass);
+
+-- Inserting countries
+INSERT INTO public.countries(country)
+SELECT DISTINCT country
+FROM public.imdb_moviecountries;
+
+-- Adding new language_id column
+ALTER TABLE public.imdb_moviecountries
+ADD COLUMN country_id integer;
+
+-- Updating column with countries ids
+UPDATE imdb_moviecountries
+SET country_id=countries.country_id
+FROM countries
+WHERE imdb_moviecountries.country=countries.country;
+
+-- Deleting column with countries strings
+ALTER TABLE imdb_moviecountries
+DROP COLUMN country;
+
+-- Setting up new PK's and FK's
+ALTER TABLE ONLY public.imdb_moviecountries
+ADD CONSTRAINT imdb_moviecountries_pkey PRIMARY KEY (movieid, country_id);
+
+ALTER TABLE ONLY public.imdb_moviecountries
+ADD CONSTRAINT imdb_moviecountries_country_id_fkey FOREIGN KEY (country_id) REFERENCES public.countries(country_id);
+
+
+-- IMDB_MOVIEGENRES
+-- Creating new genres table
+CREATE TABLE public.genres(
+    genre_id integer PRIMARY KEY NOT NULL,
+    genre character varying(32) NOT NULL
+);
+ALTER TABLE public.genres OWNER TO alumnodb;
+
+-- Creating sequence of the id (PK) before inserting
+CREATE SEQUENCE public.genres_genre_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER TABLE public.genres_genre_id_seq OWNER TO alumnodb;
+
+ALTER SEQUENCE public.genres_genre_id_seq OWNED BY public.genres.genre_id;
+
+ALTER TABLE ONLY public.genres ALTER COLUMN genre_id SET DEFAULT nextval('public.genres_genre_id_seq'::regclass);
+
+-- Inserting genres
+INSERT INTO public.genres(genre)
+SELECT DISTINCT genre
+FROM public.imdb_moviegenres;
+
+-- Adding new genre_id column
+ALTER TABLE public.imdb_moviegenres
+ADD COLUMN genre_id integer;
+
+-- Updating column with genres ids
+UPDATE imdb_moviegenres
+SET genre_id=genres.genre_id
+FROM genres
+WHERE imdb_moviegenres.genre=genres.genre;
+
+-- Deleting column with genres strings
+ALTER TABLE imdb_moviegenres
+DROP COLUMN genre;
+
+-- Setting up new PK's and FK's
+ALTER TABLE ONLY public.imdb_moviegenres
+ADD CONSTRAINT imdb_moviegenres_pkey PRIMARY KEY (movieid, genre_id);
+
+ALTER TABLE ONLY public.imdb_moviegenres
+ADD CONSTRAINT imdb_moviegenres_genre_id_fkey FOREIGN KEY (genre_id) REFERENCES public.genres(genre_id);
 
 -----------------------------------------------------------------------
