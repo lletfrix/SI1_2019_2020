@@ -2,6 +2,5 @@
 clean_fakedb.py
 clean_db.sh
 clean_sessions.sh
-dbscript.sh
 1401_*
 example-*

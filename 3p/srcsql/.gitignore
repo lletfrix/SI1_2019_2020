@@ -1,0 +1,3 @@
+*.pyc
+dbscript.sh
+dump_*
