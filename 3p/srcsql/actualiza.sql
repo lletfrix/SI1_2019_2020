@@ -89,10 +89,10 @@ FOREIGN KEY (prod_id) REFERENCES products(prod_id); -- no action
 
 -- Creating new columns stock and sales in products' table
 ALTER TABLE products
-ADD COLUMN stock integer;
+ADD COLUMN stock integer DEFAULT 0;
 
 ALTER TABLE products
-ADD COLUMN sales integer;
+ADD COLUMN sales integer DEFAULT 0;
 
 -- Merging stock values
 UPDATE products
@@ -258,3 +258,13 @@ ALTER TABLE ONLY public.imdb_moviegenres
 ADD CONSTRAINT imdb_moviegenres_genre_id_fkey FOREIGN KEY (genre_id) REFERENCES public.genres(genre_id);
 
 -----------------------------------------------------------------------
+-- RESOLVING INCONSISTENCY WITH PRODUCTS.SALES AND ORDERS
+
+UPDATE products
+SET sales=S.sum_q
+FROM (
+    SELECT prod_id, sum(quantity) AS sum_q
+    FROM orderdetail
+    GROUP BY prod_id
+) S
+WHERE products.prod_id=S.prod_id;

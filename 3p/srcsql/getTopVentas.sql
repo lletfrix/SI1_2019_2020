@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------
+-- Authors:
+--          · Alejandro Santorum Varela
+--          · Rafael Sanchez Sanchez
+--  Date: October 7, 2019
+--  File: getTopVentas.sql
+--  Project: Computer Systems I Assignments
+-------------------------------------------------------------------------
