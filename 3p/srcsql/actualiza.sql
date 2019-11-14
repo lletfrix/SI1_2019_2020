@@ -9,7 +9,12 @@
 
 
 -------------------------------------------------------------------------
--- ADDING PRIMARY KEYS AND FOREIGN KEYS
+-- ADDING PRIMARY KEYS AND FOREIGN KEYS (among other constraints)
+
+-- Setting customer nickname to be unique
+ALTER TABLE customers
+ADD CONSTRAINT nickname_unique
+UNIQUE nickname;
 
 -- Adding foreign key in orders
 ALTER TABLE orders
@@ -256,6 +261,8 @@ ADD CONSTRAINT imdb_moviegenres_pkey PRIMARY KEY (movieid, genre_id);
 
 ALTER TABLE ONLY public.imdb_moviegenres
 ADD CONSTRAINT imdb_moviegenres_genre_id_fkey FOREIGN KEY (genre_id) REFERENCES public.genres(genre_id);
+-------------------------------------------------------------------------
+-- INSERTING CASH COLUMN IN CUSTOMERS TABLE
 
 -----------------------------------------------------------------------
 -- RESOLVING INCONSISTENCY WITH PRODUCTS.SALES AND ORDERS
@@ -268,3 +275,14 @@ FROM (
     GROUP BY prod_id
 ) S
 WHERE products.prod_id=S.prod_id;
+
+-----------------------------------------------------------------------
+-- CREATING NEW ALERTAS TABLE
+
+CREATE TABLE public.alertas(
+    prod_id integer PRIMARY KEY NOT NULL
+);
+ALTER TABLE public.alertas OWNER TO alumnodb;
+
+ALTER TABLE ONLY public.alerts
+ADD CONSTRAINT alertas_prod_id_fkey FOREIGN KEY (prod_id) REFERENCES public.products(prod_id);

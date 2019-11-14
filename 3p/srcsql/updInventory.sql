@@ -24,7 +24,7 @@ BEGIN
         mod_quantity := (SELECT stock FROM products WHERE products.prod_id=rec.prod_id);
 
         IF mod_quantity=0 THEN
-            INSERT INTO alertas(prod_id) VALUES (rec.prod_id);
+            INSERT INTO alerts(prod_id) VALUES (rec.prod_id);
         END IF;
     END LOOP;
     RETURN NEW;
@@ -36,5 +36,5 @@ CREATE TRIGGER updInventory
 AFTER UPDATE
 ON orders
 FOR EACH ROW
-WHEN OLD.status IS DISTINCT FROM NEW.status
+WHEN (OLD.status IS DISTINCT FROM NEW.status)
 EXECUTE PROCEDURE updInv_func();
