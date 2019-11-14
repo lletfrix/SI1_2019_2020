@@ -264,6 +264,12 @@ ADD CONSTRAINT imdb_moviegenres_genre_id_fkey FOREIGN KEY (genre_id) REFERENCES 
 -------------------------------------------------------------------------
 -- INSERTING CASH COLUMN IN CUSTOMERS TABLE
 
+-- Creating column
+ALTER TABLE public.customers
+ADD cash float;
+
+-- Adding random values
+
 -----------------------------------------------------------------------
 -- RESOLVING INCONSISTENCY WITH PRODUCTS.SALES AND ORDERS
 
