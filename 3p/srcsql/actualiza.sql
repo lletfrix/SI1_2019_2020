@@ -2,7 +2,7 @@
 -- Authors:
 --          · Alejandro Santorum Varela
 --          · Rafael Sanchez Sanchez
---  Date: October 7, 2019
+--  Date: November 14, 2019
 --  File: actualiza.sql
 --  Project: Computer Systems I Assignments
 -------------------------------------------------------------------------
@@ -261,14 +261,14 @@ ADD CONSTRAINT imdb_moviegenres_pkey PRIMARY KEY (movieid, genre_id);
 
 ALTER TABLE ONLY public.imdb_moviegenres
 ADD CONSTRAINT imdb_moviegenres_genre_id_fkey FOREIGN KEY (genre_id) REFERENCES public.genres(genre_id);
+
 -------------------------------------------------------------------------
 -- INSERTING CASH COLUMN IN CUSTOMERS TABLE
 
 -- Creating column
 ALTER TABLE public.customers
 ADD cash float DEFAULT 100;
-
--- Adding random values
+-----------------------------------------------------------------------
 
 
 -----------------------------------------------------------------------
@@ -282,6 +282,8 @@ FROM (
     GROUP BY prod_id
 ) S
 WHERE products.prod_id=S.prod_id;
+-----------------------------------------------------------------------
+
 
 -----------------------------------------------------------------------
 -- CREATING NEW ALERTAS TABLE
@@ -293,3 +295,21 @@ ALTER TABLE public.alerts OWNER TO alumnodb;
 
 ALTER TABLE ONLY public.alerts
 ADD CONSTRAINT alertas_prod_id_fkey FOREIGN KEY (prod_id) REFERENCES public.products(prod_id);
+-----------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------
+
+-- Creating a auxliary table (view) to set updated price (setPrice.sql file)
+CREATE VIEW new_price_table AS
+SELECT orderdetail.orderid,
+       orderdetail.prod_id,
+       -- Current_price / ((1.02)^(current_year - order_year)) -> casted to numeric to be rounded later
+       ROUND(
+            CAST(
+                (products.price * POWER(1.02, -(DATE_PART('year', now()::date) - DATE_PART('year', orderdate))))
+            AS numeric),
+        2) AS new_price
+FROM products, orders, orderdetail
+WHERE products.prod_id=orderdetail.prod_id
+    AND orders.orderid=orderdetail.orderid;
