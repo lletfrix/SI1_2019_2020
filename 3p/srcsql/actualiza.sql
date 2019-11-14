@@ -11,10 +11,10 @@
 -------------------------------------------------------------------------
 -- ADDING PRIMARY KEYS AND FOREIGN KEYS (among other constraints)
 
--- Setting customer nickname to be unique
+-- Setting customer username to be unique
 ALTER TABLE customers
-ADD CONSTRAINT nickname_unique
-UNIQUE nickname;
+ADD CONSTRAINT email_unique
+UNIQUE (email);
 
 -- Adding foreign key in orders
 ALTER TABLE orders
@@ -266,9 +266,10 @@ ADD CONSTRAINT imdb_moviegenres_genre_id_fkey FOREIGN KEY (genre_id) REFERENCES 
 
 -- Creating column
 ALTER TABLE public.customers
-ADD cash float;
+ADD cash float DEFAULT 100;
 
 -- Adding random values
+
 
 -----------------------------------------------------------------------
 -- RESOLVING INCONSISTENCY WITH PRODUCTS.SALES AND ORDERS
@@ -285,10 +286,10 @@ WHERE products.prod_id=S.prod_id;
 -----------------------------------------------------------------------
 -- CREATING NEW ALERTAS TABLE
 
-CREATE TABLE public.alertas(
+CREATE TABLE public.alerts(
     prod_id integer PRIMARY KEY NOT NULL
 );
-ALTER TABLE public.alertas OWNER TO alumnodb;
+ALTER TABLE public.alerts OWNER TO alumnodb;
 
 ALTER TABLE ONLY public.alerts
 ADD CONSTRAINT alertas_prod_id_fkey FOREIGN KEY (prod_id) REFERENCES public.products(prod_id);
