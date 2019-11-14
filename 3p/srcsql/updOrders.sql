@@ -1,3 +1,11 @@
+-------------------------------------------------------------------------
+-- Authors:
+--          · Alejandro Santorum Varela
+--          · Rafael Sanchez Sanchez
+--  Date: November 14, 2019
+--  File: updOrders.sql
+--  Project: Computer Systems I Assignments
+-------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION updOrders_func()
 RETURNS TRIGGER AS $$
 DECLARE

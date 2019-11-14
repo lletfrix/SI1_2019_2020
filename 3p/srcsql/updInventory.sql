@@ -1,3 +1,12 @@
+-------------------------------------------------------------------------
+-- Authors:
+--          · Alejandro Santorum Varela
+--          · Rafael Sanchez Sanchez
+--  Date: November 8, 2019
+--  File: updInventory.sql
+--  Project: Computer Systems I Assignments
+-------------------------------------------------------------------------
+
 CREATE OR REPLACE FUNCTION updInv_func()
 RETURNS TRIGGER AS $$
 DECLARE

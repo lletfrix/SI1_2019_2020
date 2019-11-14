@@ -8,9 +8,9 @@
 -------------------------------------------------------------------------
 
 
---- AUXIXLIARY VIEW MOVED TO ACTUALIZA.SQL ---
+--- AUXILIARY VIEW MOVED TO ACTUALIZA.SQL ---
 
--- Creating a auixliary table (view) to set updated price
+-- Creating a auxiliary table (view) to set updated price
 -- CREATE VIEW new_price_table AS
 -- SELECT orderdetail.orderid,
 --        orderdetail.prod_id,
