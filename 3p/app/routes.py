@@ -62,39 +62,51 @@ def register():
         nick = request.form.get('nickname')
         passwd = request.form.get('password')
         mail = request.form.get('mail')
-        ccard = request.form.get('ccard')
+        name = request.form.get('name')
+        surname = request.form.get('surname')
         addr = request.form.get('address')
-        # Validate fields
+        city = request.form.get('city')
+        region = request.form.get('region')
+        country = request.form.get('country')
+        ccard_type = request.form.get('card_type')
+        ccard = request.form.get('ccard')
+        expiry = request.form.get('expiry_date')
+        # Validate fields TODO: CHECK ALL OF THEM
         if not (nick and passwd and mail and ccard and addr):
             flash('Por favor, rellene todos los campos obligatorios')
             return render_template('register.html')
-        # Check user is available
-        users = next(os.walk(os.path.join(app.root_path, USERS_FOLDER)))[1]
-        if nick in users:
-            flash('Usuario no disponible')
-            return render_template('register.html')
-        # The username is available, so we store all the data
-        # Hashing the password with md5
-        md5 = hashlib.md5()
-        md5.update(passwd.encode('utf-8'))
-        encpwd = md5.hexdigest()
-        # Preparing data to be stored
-        ####### data = [nick, encpwd, mail, ccard, random.randint(0, 100)]
-        data = {'nickname': nick, 'password': encpwd, 'mail': mail, 'ccard': ccard, 'address': addr, 'cash': random.randint(0, 100), 'cart':{}}
-        # Writing user data file
-        slug_nick = nick.lower()
-        os.mkdir(os.path.join(app.root_path, USERS_FOLDER, slug_nick))
-        with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, DATA_FILE), 'wb') as file:
-            pickle.dump(data, file)
-        # Initializing user history file
-        with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), 'w') as file:
-            history = {'historial': []}
-            json.dump(history, file)
+        # Acommodate data
+        expiry = '20'+expiry[-2:]+expiry[:2]
 
-        f = request.files.get('file')
-        if (f):
-            os.mkdir(os.path.join(app.root_path, STATIC_IMG, slug_nick))
-            f.save(os.path.join(app.root_path, STATIC_IMG, slug_nick, PHOTO_FILE))
+        # Check user is available
+        if not db.db_isAvailableEmail(email):
+            flash('Ya existe un usuario registrado con este e-mail')
+            return render_template('register.html')
+
+        db.db_registerUser(nick, passwd, mail, name, surname, addr, city, region,\
+                           country, ccard_type, ccard, expiry)
+        # # The username is available, so we store all the data
+        # # Hashing the password with md5
+        # md5 = hashlib.md5()
+        # md5.update(passwd.encode('utf-8'))
+        # encpwd = md5.hexdigest()
+        # # Preparing data to be stored
+        # ####### data = [nick, encpwd, mail, ccard, random.randint(0, 100)]
+        # data = {'nickname': nick, 'password': encpwd, 'mail': mail, 'ccard': ccard, 'address': addr, 'cash': random.randint(0, 100), 'cart':{}}
+        # # Writing user data file
+        # slug_nick = nick.lower()
+        # os.mkdir(os.path.join(app.root_path, USERS_FOLDER, slug_nick))
+        # with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, DATA_FILE), 'wb') as file:
+        #     pickle.dump(data, file)
+        # # Initializing user history file
+        # with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), 'w') as file:
+        #     history = {'historial': []}
+        #     json.dump(history, file)
+        #
+        # f = request.files.get('file')
+        # if (f):
+        #     os.mkdir(os.path.join(app.root_path, STATIC_IMG, slug_nick))
+        #     f.save(os.path.join(app.root_path, STATIC_IMG, slug_nick, PHOTO_FILE))
 
         return redirect(url_for('index'))
     else:
@@ -115,8 +127,6 @@ def login():
 
         # Gets the user data from the db
         userdata = db.db_userData(email)
-        print(userdata)
-        userdata['cart'] = db.db_userCart(email)
         # Checks if user is registered
         if not userdata:
             flash('Usuario no registrado')
@@ -127,22 +137,7 @@ def login():
             flash('Contraseña incorrecta')
             return render_template('login.html')
 
-        # # Checking if the user is already registered
-        # slug_nick = nick.lower()
-        # users = next(os.walk(os.path.join(app.root_path, USERS_FOLDER)))[1]
-        # if slug_nick not in users:
-        #     flash('Usuario no registrado')
-        #     return render_template('login.html')
-        # # Checking the password
-        # md5 = hashlib.md5()
-        # md5.update(passwd.encode('utf-8'))
-        # encpwd = md5.hexdigest()
-        # with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, DATA_FILE), 'rb') as file:
-        #     userdata = pickle.load(file)
-        # if encpwd != userdata['password']:
-        #     flash('Contraseña incorrecta')
-        #     return render_template('login.html')
-
+        userdata['cart'] = db.db_userCart(email)
 
         # Sessions
         session['nickname'] = userdata['nickname']
@@ -182,12 +177,12 @@ def _update_userdata(*argv):
 @app.route('/logout', methods=['POST'])
 def logout():
     # Storing current cart data into user data file
-    _update_userdata('cash', 'cart', 'address')
+    # _update_userdata('cash', 'cart', 'address')
     resp = redirect(url_for('index'))
-    resp.set_cookie('last_email', session['email'])
+    resp.set_cookie('last_email', session['mail'])
     # Deleting user data at current session
     session.pop('nickname', None)
-    session.pop('email', None)
+    session.pop('mail', None)
     # Deleting cart data in case another user logs in
     session.pop('cart', None)
     return resp
