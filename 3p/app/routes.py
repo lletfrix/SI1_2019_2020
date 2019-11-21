@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from app import app
+from app import database
 from flask import render_template, request, url_for, redirect, session, flash
 import json
 import os
@@ -111,6 +112,7 @@ def login():
         if not (nick and passwd):
             flash('Por favor, rellene todos los campos')
             return render_template('login.html')
+
         # Checking if the user is already registered
         slug_nick = nick.lower()
         users = next(os.walk(os.path.join(app.root_path, USERS_FOLDER)))[1]
@@ -126,6 +128,8 @@ def login():
         if encpwd != userdata['password']:
             flash('Contraseña incorrecta')
             return render_template('login.html')
+
+
         # Sessions
         session['nickname'] = userdata['nickname']
         session['mail'] = userdata['mail']
