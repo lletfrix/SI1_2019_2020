@@ -4,3 +4,5 @@
 select setOrderAmount();
 \i getTopVentas.sql;
 \i getTopMonths.sql;
+\i updOrders.sql;
+\i updInventory.sql;
