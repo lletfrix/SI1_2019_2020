@@ -11,10 +11,17 @@
 -------------------------------------------------------------------------
 -- ADDING PRIMARY KEYS AND FOREIGN KEYS (among other constraints)
 
--- Setting customer username to be unique
+-- Setting customer email to be unique
 ALTER TABLE customers
 ADD CONSTRAINT email_unique
 UNIQUE (email);
+
+-- Setting email to be NOT NULL
+ALTER TABLE customers ALTER COLUMN email SET NOT NULL;
+
+-- Setting customerid sequence to start at the right ID
+---- 14094 = (select max(customerid) from customers;) + 1
+ALTER SEQUENCE customers_customerid_seq RESTART WITH 14094;
 
 -- Adding foreign key in orders
 ALTER TABLE orders
