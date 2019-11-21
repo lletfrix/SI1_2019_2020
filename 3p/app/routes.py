@@ -115,6 +115,7 @@ def login():
 
         # Gets the user data from the db
         userdata = db.db_userData(email)
+        print(userdata)
         userdata['cart'] = db.db_userCart(email)
         # Checks if user is registered
         if not userdata:

@@ -29,11 +29,12 @@ def db_userData(email):
         # Email is primary key, so it is an unique result (if any)
         userdata = list(customer_rows)[0]
         ret_userdata = {
-            'nickname': userdata[14],
+            'nickname': userdata[15],
+            'password': userdata[16],
             'mail': userdata[10],
             'ccard': userdata[13],
             'cash': userdata[-1],
-            'address': userdata[2],
+            'address': userdata[3],
         }
         return ret_userdata
     except:
