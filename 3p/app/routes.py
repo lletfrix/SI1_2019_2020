@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from app import app
-from app import database
+from app import database as db
 from flask import render_template, request, url_for, redirect, session, flash
 import json
 import os
@@ -105,29 +105,42 @@ def register():
 def login():
     if request.method == 'POST':
         # Getting data from form
-        nick = request.form.get('nickname')
+        email = request.form.get('email')
         passwd = request.form.get('password')
         # Checking user data
         # Validate fields
-        if not (nick and passwd):
+        if not (email and passwd):
             flash('Por favor, rellene todos los campos')
             return render_template('login.html')
 
-        # Checking if the user is already registered
-        slug_nick = nick.lower()
-        users = next(os.walk(os.path.join(app.root_path, USERS_FOLDER)))[1]
-        if slug_nick not in users:
+        # Gets the user data from the db
+        userdata = db.db_userData(email)
+        userdata['cart'] = db.db_userCart(email)
+        # Checks if user is registered
+        if not userdata:
             flash('Usuario no registrado')
             return render_template('login.html')
-        # Checking the password
-        md5 = hashlib.md5()
-        md5.update(passwd.encode('utf-8'))
-        encpwd = md5.hexdigest()
-        with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, DATA_FILE), 'rb') as file:
-            userdata = pickle.load(file)
-        if encpwd != userdata['password']:
+
+        # Checks if the password matches
+        if passwd != userdata['password']:
             flash('Contraseña incorrecta')
             return render_template('login.html')
+
+        # # Checking if the user is already registered
+        # slug_nick = nick.lower()
+        # users = next(os.walk(os.path.join(app.root_path, USERS_FOLDER)))[1]
+        # if slug_nick not in users:
+        #     flash('Usuario no registrado')
+        #     return render_template('login.html')
+        # # Checking the password
+        # md5 = hashlib.md5()
+        # md5.update(passwd.encode('utf-8'))
+        # encpwd = md5.hexdigest()
+        # with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, DATA_FILE), 'rb') as file:
+        #     userdata = pickle.load(file)
+        # if encpwd != userdata['password']:
+        #     flash('Contraseña incorrecta')
+        #     return render_template('login.html')
 
 
         # Sessions
@@ -136,8 +149,8 @@ def login():
         session['ccard'] = userdata['ccard']
         session['cash'] = userdata['cash']
         session['address'] = userdata['address']
-        session['slug_nick'] = slug_nick
-        session['photo'] = os.path.isfile(os.path.join(app.root_path, STATIC_IMG, slug_nick, PHOTO_FILE))
+        # session['photo'] = os.path.isfile(os.path.join(app.root_path, STATIC_IMG, slug_nick, PHOTO_FILE))
+        session['photo'] = False
 
         if session.get('cart'):
             ### DEBUG PLS
@@ -147,8 +160,8 @@ def login():
             session['cart'] = userdata['cart']
         return redirect(url_for('index'))
     else:
-        last_nick = request.cookies.get('last_nickname')
-        return render_template('login.html', last_nick=last_nick)
+        last_email = request.cookies.get('last_email')
+        return render_template('login.html', last_email=last_email)
 
 
 def _update_userdata(*argv):
@@ -170,9 +183,10 @@ def logout():
     # Storing current cart data into user data file
     _update_userdata('cash', 'cart', 'address')
     resp = redirect(url_for('index'))
-    resp.set_cookie('last_nickname', session['nickname'])
+    resp.set_cookie('last_email', session['email'])
     # Deleting user data at current session
     session.pop('nickname', None)
+    session.pop('email', None)
     # Deleting cart data in case another user logs in
     session.pop('cart', None)
     return resp
