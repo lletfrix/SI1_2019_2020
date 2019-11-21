@@ -124,10 +124,10 @@ def db_registerUser(username, password, email, firstname, lastname, address1,
 
         sep = "\'"
         coma = ", "
-        query_str = "INSERT INTO customers(customerid, firstname, lastname, address1, city, "
+        query_str = "INSERT INTO customers(firstname, lastname, address1, city, "
         query_str += "country, region, email, creditcardtype, creditcard, "
         query_str += "creditcardexpiration, username, password, age, income)"
-        query_str += " VALUES (15002, "+sep+firstname+sep+coma+sep+lastname+sep+coma
+        query_str += " VALUES ("+sep+firstname+sep+coma+sep+lastname+sep+coma
         query_str += sep+address1+sep+coma+sep+city+sep+coma+sep+country+sep+coma
         query_str += sep+region+sep+coma+sep+email+sep+coma+sep+ccard_type+sep+coma
         query_str += sep+ccard_num+sep+coma+sep+ccard_exp+sep+coma+sep+username+sep+coma
