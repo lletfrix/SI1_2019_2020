@@ -8,9 +8,11 @@ from sqlalchemy.exc import IntegrityError
 from psycopg2.errors import UniqueViolation
 
 # Configure sqlalchemy engine
-db_engine = create_engine("postgresql://alumnodb:alumnodb@localhost/si1", echo=False)
+# db_engine = create_engine("postgresql://alumnodb:alumnodb@localhost/si1", echo=False)
+db_engine = create_engine("postgresql://alumnodb:alumnodb@localhost/si1?client_encoding=utf8", echo=False)
 db_meta = MetaData(bind=db_engine)
 # load tables
+db_tb_movies = Table('imdb_movies', db_meta, autoload=True, autoload_with=db_engine)
 db_tb_customers = Table('customers', db_meta, autoload=True, autoload_with=db_engine)
 db_tb_orderdetail = Table('orderdetail', db_meta, autoload=True, autoload_with=db_engine)
 
@@ -142,6 +144,31 @@ def db_registerUser(username, password, email, firstname, lastname, address1,
         return False #TODO: Maybe return None to differenciate from False?
 
 
+#TODO: Check what happens if the user searches with gender filter but no search string
+def db_search(search_str, gender=None):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        if gender == None:
+            where_str = "movietitle LIKE \'%"+search_str+"%\'"
+            query = select([db_tb_movies]).where(text(where_str))
+            ret = db_conn.execute(query)
+
+            db_conn.close() # Close the connection
+            return list(ret)
+
+    except: # Other exceptions
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+        return None
+
+
 #TODO: CHECK TRIGGER
 def db_insertItemCart(orderid, prod_id, unit_price, quantity):
     try:
@@ -175,4 +202,7 @@ def db_insertItemCart(orderid, prod_id, unit_price, quantity):
 if __name__ == "__main__":
     # print(db_userData('mail@mail.es'))
     # print(db_registerUser('hallow', '123456789', 'mail@mail.es', 'alex', 'santo', 'plaza marina', 'lalin', 'pont', 'espana', 'visa', '1234567891234567', '222203'))
-    print(db_insertItemCart(181791, 9, 19, 2))
+    # print(db_insertItemCart(181791, 9, 19, 2))
+    title_part = "George"
+    print(db_search(title_part))
+    print("=======================")
