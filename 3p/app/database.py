@@ -15,6 +15,7 @@ db_meta = MetaData(bind=db_engine)
 db_tb_movies = Table('imdb_movies', db_meta, autoload=True, autoload_with=db_engine)
 db_tb_customers = Table('customers', db_meta, autoload=True, autoload_with=db_engine)
 db_tb_orderdetail = Table('orderdetail', db_meta, autoload=True, autoload_with=db_engine)
+db_tb_genres = Table('genres', db_meta, autoload=True, autoload_with=db_engine)
 
 
 def db_userData(email):
@@ -144,6 +145,33 @@ def db_registerUser(username, password, email, firstname, lastname, address1,
         return False #TODO: Maybe return None to differenciate from False?
 
 
+def db_getGenres():
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        query = select([db_tb_genres.c.genre.distinct()])
+        genres_ret = db_conn.execute(query)
+
+        db_conn.close()
+
+        genres_lst = []
+        for item in genres_ret:
+            genres_lst.append(item[0])
+        genres_ret.close()
+        return list(genres_lst)
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return None
+
+
 #TODO: Check what happens if the user searches with gender filter but no search string
 def db_search(search_str, gender=None):
     try:
@@ -203,6 +231,9 @@ if __name__ == "__main__":
     # print(db_userData('mail@mail.es'))
     # print(db_registerUser('hallow', '123456789', 'mail@mail.es', 'alex', 'santo', 'plaza marina', 'lalin', 'pont', 'espana', 'visa', '1234567891234567', '222203'))
     # print(db_insertItemCart(181791, 9, 19, 2))
-    title_part = "George"
-    print(db_search(title_part))
-    print("=======================")
+
+    # title_part = "George"
+    # print(db_search(title_part))
+    # print("=======================")
+
+    # print(db_getGenres(), "|||", len(db_getGenres()))
