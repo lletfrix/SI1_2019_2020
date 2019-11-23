@@ -331,3 +331,13 @@ SELECT setval('customers_customerid_seq', max(customerid)) FROM customers;
 
 -- Setting orderid sequence to start at the right ID
 SELECT setval('orders_orderid_seq', max(orderid)) FROM orders;
+
+-- Setting default netamount and totalamount value 0 and taxes 15
+ALTER TABLE public.orders
+ALTER netamount SET DEFAULT 0.0;
+
+ALTER TABLE public.orders
+ALTER totalamount SET DEFAULT 0.0;
+
+ALTER TABLE public.orders
+ALTER tax SET DEFAULT 15;
