@@ -19,10 +19,6 @@ UNIQUE (email);
 -- Setting email to be NOT NULL
 ALTER TABLE customers ALTER COLUMN email SET NOT NULL;
 
--- Setting customerid sequence to start at the right ID
----- 14094 = (select max(customerid) from customers;) + 1
-ALTER SEQUENCE customers_customerid_seq RESTART WITH 14094;
-
 -- Adding foreign key in orders
 ALTER TABLE orders
 ADD CONSTRAINT orders_customerid_fkey
@@ -329,3 +325,9 @@ WHERE products.prod_id=orderdetail.prod_id
 ALTER TABLE customers
 ALTER COLUMN region
 TYPE character varying(32);
+
+-- Setting customerid sequence to start at the right ID
+SELECT setval('customers_customerid_seq', max(customerid)) FROM customers;
+
+-- Setting orderid sequence to start at the right ID
+SELECT setval('orders_orderid_seq', max(orderid)) FROM orders;
