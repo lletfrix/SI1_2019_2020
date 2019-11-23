@@ -4,6 +4,8 @@ import sys, traceback
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, text
 from sqlalchemy.sql import select
+from sqlalchemy.exc import IntegrityError
+from psycopg2.errors import UniqueViolation
 
 # Configure sqlalchemy engine
 db_engine = create_engine("postgresql://alumnodb:alumnodb@localhost/si1", echo=False)
@@ -86,35 +88,7 @@ def db_userCart(email):
         return None
 
 
-def db_isAvailableEmail(email):
-    try:
-        # Connect to database
-        db_conn = None
-        db_conn = db_engine.connect()
-
-        # Select users with given email
-        query_str = "SELECT * FROM customers WHERE email=\''"+email+"\'"
-        users_rows = db_conn.execute(query_str)
-
-        db_conn.close() # Close the connection
-        if users_rows.rowcount == 0:
-            users_rows.close()
-            return True # Given email is not in the db
-
-        users_rows.close()
-        return False
-
-    except:
-        if db_conn is not None:
-            db_conn.close()
-        print("Exception in DB access:")
-        print("-"*60)
-        traceback.print_exc(file=sys.stderr)
-        print("-"*60)
-
-        return False
-
-
+# TODO: region must have less than 6 chars (or change it in the database)
 def db_registerUser(username, password, email, firstname, lastname, address1,
                     city, region, country, ccard_type, ccard_num, ccard_exp):
     try:
@@ -138,18 +112,20 @@ def db_registerUser(username, password, email, firstname, lastname, address1,
         db_conn.close() # Close the connection
         ret.close()
         return True
-    except:
+    except IntegrityError as e: # Checking if the email is already registered
+        assert isinstance(e.orig, UniqueViolation)
+        return False
+    except: # Other exceptions
         if db_conn is not None:
             db_conn.close()
         print("Exception in DB access:")
         print("-"*60)
         traceback.print_exc(file=sys.stderr)
         print("-"*60)
-
         return False
 
 
 
 
 if __name__ == "__main__":
-    print(db_registerUser('maria', 'qwertyu', 'dasnjdbnas@askjda.es', 'dasda', 'dsadsa', 'dasdsa', 'dsada', 'dasdsa', 'dasdsa', 'visa', '1234567891234567', '222203'))
+    print(db_registerUser('hallow', '123456789', 'mail@mail.es', 'alex', 'santo', 'plaza marina', 'lalin', 'pont', 'espana', 'visa', '1234567891234567', '222203'))

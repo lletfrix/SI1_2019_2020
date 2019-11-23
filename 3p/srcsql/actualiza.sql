@@ -307,7 +307,7 @@ ADD CONSTRAINT alertas_prod_id_fkey FOREIGN KEY (prod_id) REFERENCES public.prod
 
 -----------------------------------------------------------------------
 
--- Creating a auxliary table (view) to set updated price (setPrice.sql file)
+-- Creating a auxiliary table (view) to set updated price (setPrice.sql file)
 CREATE VIEW new_price_table AS
 SELECT orderdetail.orderid,
        orderdetail.prod_id,
@@ -320,3 +320,12 @@ SELECT orderdetail.orderid,
 FROM products, orders, orderdetail
 WHERE products.prod_id=orderdetail.prod_id
     AND orders.orderid=orderdetail.orderid;
+-----------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------
+
+-- Increasing region size of customers table
+ALTER TABLE customers
+ALTER COLUMN region
+TYPE character varying(32);
