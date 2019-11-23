@@ -10,8 +10,9 @@ from psycopg2.errors import UniqueViolation
 # Configure sqlalchemy engine
 db_engine = create_engine("postgresql://alumnodb:alumnodb@localhost/si1", echo=False)
 db_meta = MetaData(bind=db_engine)
-# load a table
-#####db_table_movies = Table('customers', db_meta, autoload=True, autoload_with=db_engine)
+# load tables
+db_tb_customers = Table('customers', db_meta, autoload=True, autoload_with=db_engine)
+db_tb_orderdetail = Table('orderdetail', db_meta, autoload=True, autoload_with=db_engine)
 
 
 def db_userData(email):
@@ -21,8 +22,8 @@ def db_userData(email):
         db_conn = db_engine.connect()
 
         # Search for the user with the given email
-        query_str = 'SELECT * FROM customers WHERE email=\''+email+'\''
-        customer_rows = db_conn.execute(query_str)
+        query = select([db_tb_customers]).where(text("email=\'"+email+"\'"))
+        customer_rows = db_conn.execute(query)
 
         db_conn.close() # Close the connection
         if customer_rows.rowcount == 0:
@@ -88,7 +89,19 @@ def db_userCart(email):
         return None
 
 
-# TODO: region must have less than 6 chars (or change it in the database)
+SEP = "\'"
+COMA = ", "
+def _build_query_values(*argv):
+    l = len(argv)
+    qry_val = ""
+    for i in range(l):
+        if i != l-1:
+            qry_val += SEP+argv[i]+SEP+COMA
+        else:
+            qry_val += SEP+argv[i]+SEP
+    return qry_val
+
+
 def db_registerUser(username, password, email, firstname, lastname, address1,
                     city, region, country, ccard_type, ccard_num, ccard_exp):
     try:
@@ -96,21 +109,25 @@ def db_registerUser(username, password, email, firstname, lastname, address1,
         db_conn = None
         db_conn = db_engine.connect()
 
-        sep = "\'"
-        coma = ", "
-        query_str = "INSERT INTO customers(firstname, lastname, address1, city, "
-        query_str += "country, region, email, creditcardtype, creditcard, "
-        query_str += "creditcardexpiration, username, password, age, income)"
-        query_str += " VALUES ("+sep+firstname+sep+coma+sep+lastname+sep+coma
-        query_str += sep+address1+sep+coma+sep+city+sep+coma+sep+country+sep+coma
-        query_str += sep+region+sep+coma+sep+email+sep+coma+sep+ccard_type+sep+coma
-        query_str += sep+ccard_num+sep+coma+sep+ccard_exp+sep+coma+sep+username+sep+coma
-        query_str += sep+password+sep+coma+str(random.randint(16, 75))+coma
-        query_str += str(random.randint(9999, 99999))+")"
-        ret = db_conn.execute(query_str)
+        query = db_tb_customers.insert().values(
+                                        firstname=firstname,
+                                        lastname=lastname,
+                                        address1=address1,
+                                        city=city,
+                                        country=country,
+                                        region=region,
+                                        email=email,
+                                        creditcardtype=ccard_type,
+                                        creditcard=ccard_num,
+                                        creditcardexpiration=ccard_exp,
+                                        username=username,
+                                        password=password,
+                                        age=random.randint(16, 75),
+                                        income=random.randint(9999, 99999)
+                                        )
+        ret = db_conn.execute(query)
 
         db_conn.close() # Close the connection
-        ret.close()
         return True
     except IntegrityError as e: # Checking if the email is already registered
         assert isinstance(e.orig, UniqueViolation)
@@ -122,10 +139,40 @@ def db_registerUser(username, password, email, firstname, lastname, address1,
         print("-"*60)
         traceback.print_exc(file=sys.stderr)
         print("-"*60)
-        return False
+        return False #TODO: Maybe return None to differenciate from False?
 
+
+#TODO: CHECK TRIGGER
+def db_insertItemCart(orderid, prod_id, unit_price, quantity):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        query = db_tb_orderdetail.insert().values(
+                                        orderid=orderid,
+                                        prod_id=prod_id,
+                                        price=unit_price,
+                                        quantity=quantity
+                                        )
+        ret = db_conn.execute(query)
+
+        db_conn.close() # Close the connection
+        ret.close()
+        return True
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return False #TODO: Maybe return None to differenciate from False?
 
 
 
 if __name__ == "__main__":
-    print(db_registerUser('hallow', '123456789', 'mail@mail.es', 'alex', 'santo', 'plaza marina', 'lalin', 'pont', 'espana', 'visa', '1234567891234567', '222203'))
+    # print(db_userData('mail@mail.es'))
+    # print(db_registerUser('hallow', '123456789', 'mail@mail.es', 'alex', 'santo', 'plaza marina', 'lalin', 'pont', 'espana', 'visa', '1234567891234567', '222203'))
+    print(db_insertItemCart(181791, 9, 19, 2))
