@@ -14,7 +14,9 @@ db_meta = MetaData(bind=db_engine)
 # load tables
 db_tb_movies = Table('imdb_movies', db_meta, autoload=True, autoload_with=db_engine)
 db_tb_customers = Table('customers', db_meta, autoload=True, autoload_with=db_engine)
+db_tb_orders = Table('orders', db_meta, autoload=True, autoload_with=db_engine)
 db_tb_orderdetail = Table('orderdetail', db_meta, autoload=True, autoload_with=db_engine)
+db_tb_products = Table('products', db_meta, autoload=True, autoload_with=db_engine)
 db_tb_genres = Table('genres', db_meta, autoload=True, autoload_with=db_engine)
 
 
@@ -197,7 +199,6 @@ def db_search(search_str, gender=None):
         return None
 
 
-#TODO: CHECK TRIGGER
 def db_insertItemCart(orderid, prod_id, unit_price, quantity):
     try:
         # Connect to database
@@ -226,6 +227,35 @@ def db_insertItemCart(orderid, prod_id, unit_price, quantity):
         return False #TODO: Maybe return None to differenciate from False?
 
 
+def db_getHistory(customerid):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        where_str = "orders.customerid="+str(customerid)+" AND "
+        where_str += "orders.orderid=orderdetail.orderid AND "
+        where_str += "orderdetail.prod_id=products.prod_id AND "
+        where_str += "products.movieid=imdb_movies.movieid AND "
+        where_str += "orders.status IS NOT NULL"
+        query = select([db_tb_orders.c.orderid, db_tb_orders.c.orderdate,\
+                        db_tb_orders.c.netamount, db_tb_orders.c.totalamount,\
+                        db_tb_products.c.prod_id, db_tb_orderdetail.c.quantity,\
+                        db_tb_movies.c.movietitle]).where(text(where_str))
+
+        hist_ret = db_conn.execute(query)
+
+        db_conn.close() # Close the connection
+        return list(hist_ret)
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return None
 
 if __name__ == "__main__":
     # print(db_userData('mail@mail.es'))
@@ -237,3 +267,6 @@ if __name__ == "__main__":
     # print("=======================")
 
     # print(db_getGenres(), "|||", len(db_getGenres()))
+
+    hist_ret = db_getHistory(9)
+    print(hist_ret, "|||", len(hist_ret))
