@@ -19,10 +19,6 @@ UNIQUE (email);
 -- Setting email to be NOT NULL
 ALTER TABLE customers ALTER COLUMN email SET NOT NULL;
 
--- Setting customerid sequence to start at the right ID
----- 14094 = (select max(customerid) from customers;) + 1
-ALTER SEQUENCE customers_customerid_seq RESTART WITH 14094;
-
 -- Adding foreign key in orders
 ALTER TABLE orders
 ADD CONSTRAINT orders_customerid_fkey
@@ -307,7 +303,7 @@ ADD CONSTRAINT alertas_prod_id_fkey FOREIGN KEY (prod_id) REFERENCES public.prod
 
 -----------------------------------------------------------------------
 
--- Creating a auxliary table (view) to set updated price (setPrice.sql file)
+-- Creating a auxiliary table (view) to set updated price (setPrice.sql file)
 CREATE VIEW new_price_table AS
 SELECT orderdetail.orderid,
        orderdetail.prod_id,
@@ -320,3 +316,28 @@ SELECT orderdetail.orderid,
 FROM products, orders, orderdetail
 WHERE products.prod_id=orderdetail.prod_id
     AND orders.orderid=orderdetail.orderid;
+-----------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------
+
+-- Increasing region size of customers table
+ALTER TABLE customers
+ALTER COLUMN region
+TYPE character varying(32);
+
+-- Setting customerid sequence to start at the right ID
+SELECT setval('customers_customerid_seq', max(customerid)) FROM customers;
+
+-- Setting orderid sequence to start at the right ID
+SELECT setval('orders_orderid_seq', max(orderid)) FROM orders;
+
+-- Setting default netamount and totalamount value 0 and taxes 15
+ALTER TABLE public.orders
+ALTER netamount SET DEFAULT 0.0;
+
+ALTER TABLE public.orders
+ALTER totalamount SET DEFAULT 0.0;
+
+ALTER TABLE public.orders
+ALTER tax SET DEFAULT 15;
