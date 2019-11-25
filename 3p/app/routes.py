@@ -78,35 +78,11 @@ def register():
         # Acommodate data
         expiry = '20'+expiry[-2:]+expiry[:2]
 
-        # Check user is available
-        if not db.db_isAvailableEmail(email):
+        if not db.db_registerUser(nick, passwd, mail, name, surname, addr,\
+                                  city, region, country, ccard_type, ccard,\
+                                  expiry):
             flash('Ya existe un usuario registrado con este e-mail')
             return render_template('register.html')
-
-        db.db_registerUser(nick, passwd, mail, name, surname, addr, city, region,\
-                           country, ccard_type, ccard, expiry)
-        # # The username is available, so we store all the data
-        # # Hashing the password with md5
-        # md5 = hashlib.md5()
-        # md5.update(passwd.encode('utf-8'))
-        # encpwd = md5.hexdigest()
-        # # Preparing data to be stored
-        # ####### data = [nick, encpwd, mail, ccard, random.randint(0, 100)]
-        # data = {'nickname': nick, 'password': encpwd, 'mail': mail, 'ccard': ccard, 'address': addr, 'cash': random.randint(0, 100), 'cart':{}}
-        # # Writing user data file
-        # slug_nick = nick.lower()
-        # os.mkdir(os.path.join(app.root_path, USERS_FOLDER, slug_nick))
-        # with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, DATA_FILE), 'wb') as file:
-        #     pickle.dump(data, file)
-        # # Initializing user history file
-        # with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), 'w') as file:
-        #     history = {'historial': []}
-        #     json.dump(history, file)
-        #
-        # f = request.files.get('file')
-        # if (f):
-        #     os.mkdir(os.path.join(app.root_path, STATIC_IMG, slug_nick))
-        #     f.save(os.path.join(app.root_path, STATIC_IMG, slug_nick, PHOTO_FILE))
 
         return redirect(url_for('index'))
     else:

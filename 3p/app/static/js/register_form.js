@@ -86,7 +86,7 @@ $(document).ready( function() {
         var form_data = $('#register_form').serializeArray();
         var name = form_data[0]['value'];
         var password = form_data[1]['value'];
-        var ccard = form_data[4]['value'];
+        var ccard = form_data[10]['value'];
         if (!(name_is_valid(name) && pass_is_valid(password) && ccard_is_valid(ccard))){
             e.preventDefault();
         }

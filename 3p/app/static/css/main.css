@@ -495,3 +495,23 @@ input:focus{
     margin-left: 10px;
     font-family: monospace;
 }
+
+.name-input {
+    display: contents;
+}
+
+.address-input {
+    display: contents;
+}
+
+.ccard-input{
+    display: inline-flex;
+}
+
+#ccard_register {
+    width: 16rem;
+}
+
+#expiry_register {
+    width: 5rem;
+}
