@@ -34,13 +34,12 @@ def index():
         if (not title) and category == 'Ninguno':
             return redirect(url_for('index'))
 
-        # with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
-        #     catalogue = json.loads(data_file.read())
-        #     films = catalogue['peliculas']
-        #     if category != 'Ninguno':
-        #         films = list(filter(lambda f: category in f['categorias'], films))
-        #     films = list(filter(lambda f: title.lower() in f['titulo'].lower(), films))
-        films = db.db_search(title, None)
+        if category == 'Ninguno':
+            films = db.db_search(title)
+        elif not title:
+            films = db.db_search(None, category)
+        else:
+            films = db.db_search(title, category)
 
         if not title:
             title = 'Peliculas en la catergoría: '+category

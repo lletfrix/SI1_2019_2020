@@ -175,22 +175,25 @@ def db_getGenres():
         return None
 
 
-#TODO: Check what happens if the user searches with gender filter but no search string
-def db_search(search_str=None, gender=None):
+#TODO: Check what happens if the user searches with genre filter but no search string
+def db_search(search_str=None, genre=None):
     try:
         # Connect to database
         db_conn = None
         db_conn = db_engine.connect()
-        if not search_str and not gender:
+
+        if not search_str and not genre:
             year = datetime.date.today().year
-            top_sales_query = "SELECT prod_id, title FROM getTopVentas("+str(year-3)+")"
-            ret = db_conn.execute(top_sales_query)
+            search_query = "SELECT prod_id, title FROM getTopVentas("+str(year-3)+")"
+        elif not genre:
+            search_query = text("SELECT prod_id, movietitle FROM imdb_moviegenres NATURAL JOIN imdb_movies NATURAL JOIN products WHERE movietitle LIKE ('%"+search_str+"%')")
+        elif not search_str:
+            search_query = text("SELECT prod_id, movietitle FROM genres NATURAL JOIN imdb_moviegenres NATURAL JOIN imdb_movies NATURAL JOIN products WHERE genre='"+genre+"'")
+        else:
+            search_query = text("SELECT prod_id, movietitle FROM genres NATURAL JOIN imdb_moviegenres NATURAL JOIN imdb_movies NATURAL JOIN products WHERE genre='"+genre+"'AND movietitle LIKE ('%"+search_str+"%')")
 
-        elif gender == None:
-            search_query = text("SELECT prod_id, movietitle FROM imdb_movies NATURAL JOIN products WHERE movietitle LIKE ('%"+search_str+"%')")
-            print('HOLA', search_query)
-            ret = db_conn.execute(search_query)
-
+        print(search_query)
+        ret = db_conn.execute(search_query)
         films = [{'id': f[0], 'titulo': f[1], 'animal':f[0]%40+1, 'theme':f[0]%16} for f in list(ret)]
         print(films)
         db_conn.close() # Close the connection
