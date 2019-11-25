@@ -34,12 +34,13 @@ def index():
         if (not title) and category == 'Ninguno':
             return redirect(url_for('index'))
 
-        with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
-            catalogue = json.loads(data_file.read())
-            films = catalogue['peliculas']
-            if category != 'Ninguno':
-                films = list(filter(lambda f: category in f['categorias'], films))
-            films = list(filter(lambda f: title.lower() in f['titulo'].lower(), films))
+        # with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
+        #     catalogue = json.loads(data_file.read())
+        #     films = catalogue['peliculas']
+        #     if category != 'Ninguno':
+        #         films = list(filter(lambda f: category in f['categorias'], films))
+        #     films = list(filter(lambda f: title.lower() in f['titulo'].lower(), films))
+        films = db.db_search(title, None)
 
         if not title:
             title = 'Peliculas en la catergoría: '+category
@@ -47,10 +48,11 @@ def index():
 
     else:
         # Get the last films
-        with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
-            catalogue = json.loads(data_file.read())
-            films = catalogue['peliculas']
-            films = sorted(films, key=(lambda m : m['anio']), reverse=True)[:10]
+        films = db.db_search()
+        # with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
+        #     catalogue = json.loads(data_file.read())
+        #     films = catalogue['peliculas']
+        #     films = sorted(films, key=(lambda m : m['anio']), reverse=True)[:10]
 
         return render_template('index.html', title='Home', films=films, search_query=None)
 

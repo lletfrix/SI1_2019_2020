@@ -22,31 +22,31 @@ if [[ $1 == 'stop' ]] ; then
 fi
 
 if [[ $1 == 'createdb' ]] ; then
-    createdb -U alumnodb si1
+    createdb -U alumnodb -h localhost si1
     return
 fi
 
 if [[ $1 == 'dumpdb' ]] ; then
-    gunzip -c dump_v1.3.sql.gz | psql -U alumnodb si1
+    gunzip -c dump_v1.3.sql.gz | psql -U alumnodb -h localhost si1
     return
 fi
 
 if [[ $1 == 'createdumpdb' ]] ; then
-    createdb -U alumnodb si1
-    gunzip -c dump_v1.3.sql.gz | psql -U alumnodb si1
+    createdb -U alumnodb -h localhost si1
+    gunzip -c dump_v1.3.sql.gz | psql -U alumnodb -h localhost si1
     return
 fi
 
 if [[ $1 == 'dropdb' ]] ; then
-    dropdb si1
+    dropdb si1 -U alumnodb -h localhost
     return
 fi
 
 if [[ $1 == 'all' ]] ; then
-    dropdb si1
-    createdb -U alumnodb si1
-    gunzip -c dump_v1.3.sql.gz | psql -U alumnodb si1
-    psql si1
+    dropdb si1 -U alumnodb -h localhost
+    createdb -U alumnodb -h localhost si1
+    gunzip -c dump_v1.3.sql.gz | psql -U alumnodb -h localhost si1
+    psql -U alumnodb -h localhost si1
     return
 fi
 

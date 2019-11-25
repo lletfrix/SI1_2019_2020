@@ -1,6 +1,7 @@
 import os
 import random
 import sys, traceback
+import datetime
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, text
 from sqlalchemy.sql import select
@@ -175,19 +176,25 @@ def db_getGenres():
 
 
 #TODO: Check what happens if the user searches with gender filter but no search string
-def db_search(search_str, gender=None):
+def db_search(search_str=None, gender=None):
     try:
         # Connect to database
         db_conn = None
         db_conn = db_engine.connect()
+        if not search_str and not gender:
+            year = datetime.date.today().year
+            top_sales_query = "SELECT prod_id, title FROM getTopVentas("+str(year-3)+")"
+            ret = db_conn.execute(top_sales_query)
 
-        if gender == None:
-            where_str = "movietitle LIKE \'%"+search_str+"%\'"
-            query = select([db_tb_movies]).where(text(where_str))
-            ret = db_conn.execute(query)
+        elif gender == None:
+            search_query = text("SELECT prod_id, movietitle FROM imdb_movies NATURAL JOIN products WHERE movietitle LIKE ('%"+search_str+"%')")
+            print('HOLA', search_query)
+            ret = db_conn.execute(search_query)
 
-            db_conn.close() # Close the connection
-            return list(ret)
+        films = [{'id': f[0], 'titulo': f[1], 'animal':f[0]%40+1, 'theme':f[0]%16} for f in list(ret)]
+        print(films)
+        db_conn.close() # Close the connection
+        return films
 
     except: # Other exceptions
         if db_conn is not None:

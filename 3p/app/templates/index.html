@@ -35,7 +35,7 @@
         {% for film in films %}
             <div class="cover-container">
                 <a href="{{ url_for('product', id=film.id) }}">
-                    <img class="cover" src={{ url_for('static', filename='img/'~film.poster) }} alt="{{ film.titulo }}">
+                    <img class="cover" src="https://orly-appstore.herokuapp.com/generate?title={{ film.titulo[:40] }}&top_text=DViDeo&author={{ film.author }}&image_code={{film.animal}}&theme={{film.theme}}&guide_text=&guide_text_placement=bottom_right" alt={{ film.titulo }}">
                     <span class="cover-title">{{ film.titulo }}</span>
                 </a>
             </div>

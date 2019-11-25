@@ -9,6 +9,7 @@
 
 CREATE OR REPLACE FUNCTION getTopVentas(integer)
     RETURNS TABLE (
+        prod_id integer,
         annio integer,
         title varchar,
         maxSales integer)
@@ -16,6 +17,7 @@ CREATE OR REPLACE FUNCTION getTopVentas(integer)
 
     BEGIN
         RETURN QUERY SELECT
+            Auxiliar.prod_id,
             cast(yr as integer),
             movietitle,
             cast(MaxAmountYear as integer)
@@ -23,14 +25,14 @@ CREATE OR REPLACE FUNCTION getTopVentas(integer)
             FROM
                 imdb_movies,
                 (
-                    SELECT APYT.movieid, MaxAmountPerYearTable.MaxAmountYear, MaxAmountPerYearTable.yr
+                    SELECT APYT.movieid, MaxAmountPerYearTable.MaxAmountYear, MaxAmountPerYearTable.yr, APYT.prod_id as prod_id
                     FROM (
-                        SELECT movieid, DATE_PART('year', orderdate) as yr, sum(quantity) as amount_per_year
+                        SELECT movieid, DATE_PART('year', orderdate) as yr, sum(quantity) as amount_per_year, products.prod_id as prod_id
                         FROM orders, orderdetail, products
                         WHERE orders.orderid=orderdetail.orderid
                             AND orderdetail.prod_id=products.prod_id
                             AND DATE_PART('year', orderdate) >= $1
-                            GROUP BY yr, movieid
+                            GROUP BY yr, products.prod_id
                     ) APYT
                     INNER JOIN
                         (SELECT yr, max(amount_per_year) as MaxAmountYear
@@ -41,7 +43,7 @@ CREATE OR REPLACE FUNCTION getTopVentas(integer)
                                 WHERE orders.orderid=orderdetail.orderid
                                     AND orderdetail.prod_id=products.prod_id
                                     AND DATE_PART('year', orderdate) >= $1
-                                    GROUP BY yr, movieid
+                                    GROUP BY yr, products.prod_id
                             ) APYT2
                         GROUP BY yr) MaxAmountPerYearTable
                     ON APYT.yr=MaxAmountPerYearTable.yr
