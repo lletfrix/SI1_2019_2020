@@ -25,7 +25,7 @@ STATIC_IMG = 'static/img'
 @app.route('/index.html', methods=['GET', 'POST'])
 def index():
     films = None
-
+    genres = db.db_getGenres()
     if request.method == 'POST':
         # Get the search result
         title = request.form.get('title')
@@ -44,7 +44,7 @@ def index():
 
         if not title:
             title = 'Peliculas en la catergoría: '+category
-        return render_template('index.html', title='Búsqueda', films=films, search_query=title)
+        return render_template('index.html', title='Búsqueda', films=films, search_query=title, genres=genres)
 
     else:
         # Get the last films
@@ -54,7 +54,7 @@ def index():
         #     films = catalogue['peliculas']
         #     films = sorted(films, key=(lambda m : m['anio']), reverse=True)[:10]
 
-        return render_template('index.html', title='Home', films=films, search_query=None)
+        return render_template('index.html', title='Home', films=films, search_query=None, genres=genres)
 
 
 @app.route('/register', methods=['GET', 'POST'])

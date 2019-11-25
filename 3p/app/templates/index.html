@@ -11,12 +11,9 @@
         <!-- Filter selector -->
         <select class="filter-selector" name="category">
             <option value="Ninguno">Ningún filtro</option>
-            <option value="Accion">Acción</option>
-            <option value="Aventuras">Aventuras</option>
-            <option value="Comedia">Comedia</option>
-            <option value="Drama">Drama</option>
-            <option value="Magia">Magia</option>
-            <option value="Thriller">Thriller</option>
+            {% for g in genres %}
+                <option value="{{g}}">{{g}}</option>
+            {% endfor %}
         </select>
         <!-- Search button -->
         <input class="search-button" type="submit" name="submit" value="Buscar">
