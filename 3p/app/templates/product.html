@@ -16,7 +16,7 @@
     <div class="product-container">
         <span class="film-title">{{ film.titulo }}</span>
         <div class="product-info-container">
-            <img class="product-cover" src={{ url_for('static', filename='img/'~film.poster) }} alt="{{ film.titulo }}">
+            <img class="product-cover" src="https://orly-appstore.herokuapp.com/generate?title={{ film.titulo[:40] }}&top_text=DViDeo&author={{ film.director }}&image_code={{film.animal}}&theme={{film.theme}}&guide_text=&guide_text_placement=bottom_right" alt="{{ film.titulo }}">
             <div class="product-info">
                 <div class="product-sinopsis">
                     <h3>Sinopsis</h3>
@@ -24,9 +24,9 @@
                 </div>
                 <div class="product-others">
                     <h3>Más información</h3>
-                    Año: {{ film.anio }} | Director: {{ film.director }} | Duración: {{ film.duracion }}
+                    Año: {{ film.anio }} | Director: {{ film.director }}
                 </div>
-                <h2 class="price-tag"> {{ film.precio }} </h2>
+                <h2 class="price-tag"> {{ film.precio }} €</h2>
                 {% if film.id in session['cart'] %}
                     <form action="{{ url_for('product', id=film.id)}}" method="post">
                         <input class="amount-input" type="number" name="amount" min=0 value="{{ session['cart'][film.id] }}">

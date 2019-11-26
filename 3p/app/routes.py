@@ -167,11 +167,13 @@ def logout():
 
 @app.route('/product/<id>', methods=['GET', 'POST'])
 def product(id):
-    with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
-        catalogue = json.loads(data_file.read())
-        films = catalogue['peliculas']
-        film = list(filter(lambda f: f['id'] == int(id), films))[0]
-
+    # with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
+    #     catalogue = json.loads(data_file.read())
+    #     films = catalogue['peliculas']
+    #     film = list(filter(lambda f: f['id'] == int(id), films))[0]
+    if (id == 'connectedusers'):
+        return connectedusers()
+    film = db.db_getProductDetails(id)
     if request.method == 'POST':
         if int(request.form.get('amount')) < 0:
             return render_template('product.html', title=film['titulo'], film=film)

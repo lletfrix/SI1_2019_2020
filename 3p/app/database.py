@@ -208,6 +208,32 @@ def db_search(search_str=None, genre=None):
         print("-"*60)
         return None
 
+def db_getProductDetails(prod_id):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        search_query = text("SELECT movietitle, year, directorname, price, prod_id " +
+                            "FROM products NATURAL JOIN imdb_movies NATURAL JOIN " +
+                            "imdb_directormovies NATURAL JOIN imdb_directors WHERE " +
+                            "prod_id = " + str(prod_id))
+        print(search_query)
+        ret = db_conn.execute(search_query)
+        f = list(ret)[0]
+        film = {'titulo': f[0], 'anio': f[1], 'director': f[2], 'precio': f[3], 'id': f[4],
+                'animal': f[4]%40+1, 'theme': f[4]%16}
+        db_conn.close() # Close the connection
+        return film
+
+    except: # Other exceptions
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+        return None
 
 def db_insertItemCart(orderid, prod_id, unit_price, quantity):
     try:
