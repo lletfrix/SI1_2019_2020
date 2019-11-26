@@ -47,7 +47,11 @@ def index():
 
     else:
         # Get the last films
-        films = db.db_search()
+        if not session.get('topventas'):
+            films = db.db_search()
+            session['topventas'] = films
+        else:
+            films = session['topventas']
         # with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
         #     catalogue = json.loads(data_file.read())
         #     films = catalogue['peliculas']
