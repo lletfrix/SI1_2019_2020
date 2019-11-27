@@ -241,42 +241,69 @@ def cart():
 
 @app.route('/purchase', methods=['POST'])
 def purchase():
-    if not session.get('nickname'):
+    if not session.get('mail'):
         return redirect(url_for('login'))
 
-    slug_nick = session['nickname'].lower()
-    total = 0
     if not session.get('cart'):
-        session['cart'] = {}
-
-    with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
-        catalogue = json.loads(data_file.read())
-        films = catalogue['peliculas']
-        films = list(filter(lambda f: int(f['id']) in session['cart'].keys(), films))
-
-    for f in films:
-        f['amount'] = session['cart'][f['id']]
-        total += f['precio']*f['amount']
-
-    if session['cash'] >= total:
-        session['cash'] -= total
-        session['cash'] = round(session['cash'], 2)
-
-        with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), encoding="utf-8") as data_file:
-            history = json.loads(data_file.read())
-
-        history['historial'].extend([{'id': f['id'], 'date': date.today().strftime("%d-%b-%Y"), 'address': session['address'], 'price': f['precio'], 'amount': f['amount']} for f in films])
-
-        with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), 'w') as file:
-            json.dump(history, file)
-
-        session['cart'] = {}
-        _update_userdata('cart', 'cash')
         return redirect(url_for('index'))
+    # slug_nick = session['nickname'].lower()
 
-    else:
-        flash('No dispone de saldo para esta compra.')
+    total = 0
+
+    if not db.db_checkStock(session['cart']):
+        # There's not enough stock
+        flash('No se dispone de suficiente stock suficiente de algún producto.')
         return redirect(url_for('cart'));
+
+    # Calculate total price
+    for prod_id in session['cart']:
+        product = session['cart'][prod_id]
+        total += product[0]*product[1]
+    total = round(total, 2)
+
+    # If there's not enough cash, cancel
+    if session['cash'] < total:
+        flash('No dispone de saldo para esta compra.')
+        return redirect(url_for('cart'))
+
+    # Place the order and empty the cart
+    db.db_placeOrder(session['orderid'])
+    session['orderid'] = db.db_initCart(session['customerid'])
+    session['cart'] = db.db_getCart(session['orderid'])
+
+    # Updates user cash
+    session['cash'] -= total
+    db.db_updateCash(session['customerid'], session['cash'])
+    return redirect(url_for('index'))
+
+    # with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
+    #     catalogue = json.loads(data_file.read())
+    #     films = catalogue['peliculas']
+    #     films = list(filter(lambda f: int(f['id']) in session['cart'].keys(), films))
+
+    # for f in films:
+    #     f['amount'] = session['cart'][f['id']]
+    #     total += f['precio']*f['amount']
+    #
+    # if session['cash'] >= total:
+    #     session['cash'] -= total
+    #     session['cash'] = round(session['cash'], 2)
+
+    #     with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), encoding="utf-8") as data_file:
+    #         history = json.loads(data_file.read())
+    #
+    #     history['historial'].extend([{'id': f['id'], 'date': date.today().strftime("%d-%b-%Y"), 'address': session['address'], 'price': f['precio'], 'amount': f['amount']} for f in films])
+    #
+    #     with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), 'w') as file:
+    #         json.dump(history, file)
+    #
+    #     session['cart'] = {}
+    #     _update_userdata('cart', 'cash')
+    #     return redirect(url_for('index'))
+    #
+    # else:
+    #     flash('No dispone de saldo para esta compra.')
+    #     return redirect(url_for('cart'))
 
 
 # def _cmp_dates(date):

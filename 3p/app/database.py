@@ -136,10 +136,10 @@ def db_saveCart(sess_cart, orderid):
         db_conn = None
         db_conn = db_engine.connect()
 
-
+        print('###############################################', sess_cart) # TODO: DEBUG
         query_str = 'INSERT INTO orderdetail(orderid, prod_id, quantity, price ) VALUES'
 
-        values_str = ','.join(["('"+ str(orderid) + "','" + str(id) + "','" + str(sess_cart[id][0]) + "','" + str(sess_cart[id][1]) +"')" for id in sess_cart ])
+        values_str = ','.join(["('"+ str(orderid) + "','" + str(id) + "','" + str(sess_cart[id][0]) + "','" + str(sess_cart[id][1]) +"')" for id in sess_cart.keys() ])
 
         query_str += (values_str + ' ON CONFLICT (orderid, prod_id) DO UPDATE SET quantity=excluded.quantity')
         ret = db_conn.execute(query_str)
@@ -420,6 +420,90 @@ def db_getHistory(customerid):
         print("-"*60)
 
         return None
+
+def db_checkStock(sess_cart):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        query_str = 'SELECT prod_id, stock FROM products WHERE '
+        where_str = ' OR '.join(["prod_id='"+ str(id) + "'" for id in sess_cart.keys()])
+        query_str += where_str
+
+        ret = db_conn.execute(query_str)
+
+        list_ret = list(ret)
+        dict_ret = {i[0]:i[1] for i in list_ret}
+        for prod_id in sess_cart.keys():
+            if sess_cart[prod_id][0] > dict_ret[prod_id]:
+                ret.close()
+                db_conn.close()
+                return False
+        ret.close()
+        db_conn.close()
+        return True
+
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return None
+
+
+def db_placeOrder(orderid):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        query_str = "UPDATE orders SET status='Paid' WHERE "
+        query_str += "orders.orderid="+str(orderid)
+
+        ret = db_conn.execute(text(query_str))
+        ret.close()
+        db_conn.close()
+        return True
+
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return None
+
+def db_updateCash(customerid, cash):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        query_str = "UPDATE customers SET cash='"+str(cash)+"' WHERE "
+        where_str = "customerid="+str(customerid)
+        query_str += where_str
+
+        ret = db_conn.execute(text(query_str))
+        ret.close()
+        db_conn.close()
+        return True
+
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return None
+
 
 if __name__ == "__main__":
     # print(db_userData('mail@mail.es'))
