@@ -39,6 +39,7 @@ def db_userData(email):
         # Email is primary key, so it is an unique result (if any)
         userdata = list(customer_rows)[0]
         ret_userdata = {
+            'customerid': userdata[0],
             'nickname': userdata[15],
             'password': userdata[16],
             'mail': userdata[10],
@@ -59,29 +60,63 @@ def db_userData(email):
         return None
 
 
-def db_userCart(email):
+def db_initCart(customerid):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+        query_str = 'SELECT orderid FROM orders WHERE customerid='+str(customerid)+' AND status IS NULL'
+        ret = db_conn.execute(query_str)
+
+        if ret.rowcount == 0:
+            ret.close()
+            query_str = 'INSERT INTO orders(customerid, orderdate) ' +\
+                        'VALUES('+str(customerid)+', now()::date)'
+            ret2 = db_conn.execute(query_str)
+            ret2.close()
+            query_str = 'SELECT orderid FROM orders WHERE customerid='+str(customerid)+' AND status IS NULL'
+            ret_orderid = db_conn.execute(query_str)
+            orderid = list(ret_orderid)[0][0]
+            ret_orderid.close()
+        else:
+            orderid = list(ret)[0][0]
+            ret.close()
+
+        db_conn.close()
+        return int(orderid)
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return None
+
+def db_getCart(orderid):
     try:
         # Connect to database
         db_conn = None
         db_conn = db_engine.connect()
 
         # Search for the cart of the user of the given email
-        query_str = 'SELECT prod_id, quantity FROM orders, orderdetail, customers '
-        query_str += 'WHERE customers.email=\''+email+'\' AND '
-        query_str += 'customers.customerid=orders.customerid AND '
-        query_str += 'orders.status IS NULL AND orders.orderid=orderdetail.orderid'
+        query_str = 'SELECT prod_id, quantity, price FROM orderdetail '
+        query_str += 'WHERE orderid='+str(orderid)
         cart_rows = db_conn.execute(query_str)
 
-        db_conn.close() # Close the connection
         if cart_rows.rowcount == 0:
             cart_rows.close()
-            return None # Given customer has anything in cart
+            db_conn.close() # Close the connection
+            return {} # Given customer has nothing in cart (returning empty cart)
 
         ret_list = list(cart_rows)
         ret_dict = {}
         for tuple in ret_list:
-            ret_dict[tuple[0]] = tuple[1]
+            # {prod_id: (amount, price)}
+            ret_dict[tuple[0]] = (int(tuple[1]), float(tuple[2]))
         cart_rows.close()
+        db_conn.close() # Close the connection
         return ret_dict
 
     except:
@@ -93,6 +128,33 @@ def db_userCart(email):
         print("-"*60)
 
         return None
+
+
+def db_saveCart(sess_cart, orderid):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+
+        query_str = 'INSERT INTO orderdetail(orderid, prod_id, quantity, price ) VALUES'
+
+        values_str = ','.join(["('"+ str(orderid) + "','" + str(id) + "','" + str(sess_cart[id][0]) + "','" + str(sess_cart[id][1]) +"')" for id in sess_cart ])
+
+        query_str += (values_str + ' ON CONFLICT (orderid, prod_id) DO UPDATE SET quantity=excluded.quantity')
+        ret = db_conn.execute(query_str)
+        db_conn.close()
+        ret.close()
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return None
+
 
 
 SEP = "\'"
@@ -186,11 +248,19 @@ def db_search(search_str=None, genre=None):
             year = datetime.date.today().year
             search_query = "SELECT prod_id, title FROM getTopVentas("+str(year-3)+")"
         elif not genre:
-            search_query = text("SELECT prod_id, movietitle FROM imdb_moviegenres NATURAL JOIN imdb_movies NATURAL JOIN products WHERE movietitle LIKE ('%"+search_str+"%')")
+            search_query = text("SELECT prod_id, movietitle " +
+                                "FROM imdb_movies NATURAL JOIN products " +
+                                "WHERE movietitle LIKE ('%"+search_str+"%')")
         elif not search_str:
-            search_query = text("SELECT prod_id, movietitle FROM genres NATURAL JOIN imdb_moviegenres NATURAL JOIN imdb_movies NATURAL JOIN products WHERE genre='"+genre+"'")
+            search_query = text("SELECT prod_id, movietitle " +
+                                "FROM genres NATURAL JOIN imdb_moviegenres " +
+                                "NATURAL JOIN imdb_movies NATURAL JOIN products " +
+                                "WHERE genre='"+genre+"'")
         else:
-            search_query = text("SELECT prod_id, movietitle FROM genres NATURAL JOIN imdb_moviegenres NATURAL JOIN imdb_movies NATURAL JOIN products WHERE genre='"+genre+"'AND movietitle LIKE ('%"+search_str+"%')")
+            search_query = text("SELECT prod_id, movietitle " +
+                                "FROM genres NATURAL JOIN imdb_moviegenres "+
+                                "NATURAL JOIN imdb_movies NATURAL JOIN products " +
+                                "WHERE genre='"+genre+"' AND movietitle LIKE ('%"+search_str+"%')")
 
         print(search_query)
         ret = db_conn.execute(search_query)
@@ -214,7 +284,7 @@ def db_getProductDetails(prod_id):
         db_conn = None
         db_conn = db_engine.connect()
 
-        search_query = text("SELECT movietitle, year, directorname, price, prod_id " +
+        search_query = text("SELECT movietitle, year, directorname, price, prod_id, description " +
                             "FROM products NATURAL JOIN imdb_movies NATURAL JOIN " +
                             "imdb_directormovies NATURAL JOIN imdb_directors WHERE " +
                             "prod_id = " + str(prod_id))
@@ -222,7 +292,7 @@ def db_getProductDetails(prod_id):
         ret = db_conn.execute(search_query)
         f = list(ret)[0]
         film = {'titulo': f[0], 'anio': f[1], 'director': f[2], 'precio': f[3], 'id': f[4],
-                'animal': f[4]%40+1, 'theme': f[4]%16}
+                'description': f[5], 'animal': f[4]%40+1, 'theme': f[4]%16}
         db_conn.close() # Close the connection
         return film
 

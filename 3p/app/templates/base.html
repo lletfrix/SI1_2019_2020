@@ -30,7 +30,7 @@
                     <span class="logo-name">DViDeo</span>
                 </a>
             </div>
-            {% if session['nickname'] %}
+            {% if session['mail'] %}
             <form class="login-panel-container" action="{{ url_for('logout') }}" method="post">
                 <div id="users" class="number_users"></div>
                 <input type="submit" name="submit" value="Cerrar Sesión">
@@ -42,7 +42,7 @@
 
         <!-- Side menu -->
         <div class="side-menu">
-            {% if not session['nickname'] %}
+            {% if not session['mail'] %}
                 <div class="option-container">
                     <div class="menu-option">
                         <a href="{{ url_for('login') }}">INICIAR SESIÓN</a>

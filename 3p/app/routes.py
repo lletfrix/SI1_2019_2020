@@ -118,7 +118,11 @@ def login():
             flash('Contraseña incorrecta')
             return render_template('login.html')
 
-        userdata['cart'] = db.db_userCart(email)
+
+
+        userdata['orderid'] = db.db_initCart(userdata['customerid'])
+
+        userdata['cart'] = db.db_getCart(userdata['orderid'])
 
         # Sessions
         session['nickname'] = userdata['nickname']
@@ -126,6 +130,8 @@ def login():
         session['ccard'] = userdata['ccard']
         session['cash'] = userdata['cash']
         session['address'] = userdata['address']
+        session['customerid'] = userdata['customerid']
+        session['orderid'] = userdata['orderid']
         # session['photo'] = os.path.isfile(os.path.join(app.root_path, STATIC_IMG, slug_nick, PHOTO_FILE))
         session['photo'] = False
 
@@ -133,6 +139,8 @@ def login():
             ### DEBUG PLS
             userdata['cart'].update(session['cart'])
             session['cart'].update(userdata['cart'])
+            _dump_cart()
+
         else:
             session['cart'] = userdata['cart']
         return redirect(url_for('index'))
@@ -140,6 +148,8 @@ def login():
         last_email = request.cookies.get('last_email')
         return render_template('login.html', last_email=last_email)
 
+def _dump_cart():
+    db.db_saveCart(session['cart'], session['orderid'])
 
 def _update_userdata(*argv):
     slug_nick = session['nickname'].lower()
@@ -163,6 +173,8 @@ def logout():
     resp.set_cookie('last_email', session['mail'])
     # Deleting user data at current session
     session.pop('nickname', None)
+    session.pop('customerid', None)
+    session.pop('orderid', None)
     session.pop('mail', None)
     # Deleting cart data in case another user logs in
     session.pop('cart', None)
@@ -171,24 +183,25 @@ def logout():
 
 @app.route('/product/<id>', methods=['GET', 'POST'])
 def product(id):
-    # with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
-    #     catalogue = json.loads(data_file.read())
-    #     films = catalogue['peliculas']
-    #     film = list(filter(lambda f: f['id'] == int(id), films))[0]
-    if (id == 'connectedusers'):
+    if (id == 'connectedusers'): # TODO: Check this
         return connectedusers()
     film = db.db_getProductDetails(id)
     if request.method == 'POST':
         if int(request.form.get('amount')) < 0:
             return render_template('product.html', title=film['titulo'], film=film)
 
-        if session.get('cart'):
-            session['cart'][int(id)] = int(request.form.get('amount'))
+        if session.get('cart').get(id): # If item is already added
+            session['cart'][int(id)][0] = int(request.form.get('amount'))
 
             if(int(request.form.get('amount')) == 0):
                 session['cart'].pop(int(id), None)
+        elif session.get('cart'):
+            session['cart'][int(id)] = (int(request.form.get('amount')), float(film['precio']))
         else:
-            session['cart'] = {int(id): int(request.form.get('amount'))}
+            session['cart'] = {int(id): (int(request.form.get('amount')), float(film['precio']))}
+
+        if session.get('mail'):
+            _dump_cart()
 
     return render_template('product.html', title=film['titulo'], film=film)
 
