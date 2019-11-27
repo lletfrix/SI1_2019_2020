@@ -19,7 +19,7 @@
         <tbody>
             {% for film in films %}
             <tr>
-                <td><img class="history-cover" src={{ url_for('static', filename='img/'~film.poster) }} alt="{{ film.titulo }}"></td>
+                <td><img class="history-cover" src="https://orly-appstore.herokuapp.com/generate?title={{ film.titulo[:40] }}&top_text=DViDeo&author={{ film.director }}&image_code={{film.animal}}&theme={{film.theme}}&guide_text=&guide_text_placement=bottom_right" alt="{{ film.titulo }}"></td>
                 <td>
                     <div class="history-info">
                         <span class="buy-title">{{ film.titulo }}</span>

@@ -262,10 +262,8 @@ def db_search(search_str=None, genre=None):
                                 "NATURAL JOIN imdb_movies NATURAL JOIN products " +
                                 "WHERE genre='"+genre+"' AND movietitle LIKE ('%"+search_str+"%')")
 
-        print(search_query)
         ret = db_conn.execute(search_query)
         films = [{'id': f[0], 'titulo': f[1], 'animal':f[0]%40+1, 'theme':f[0]%16} for f in list(ret)]
-        print(films)
         db_conn.close() # Close the connection
         return films
 
@@ -288,7 +286,6 @@ def db_getProductDetails(prod_id):
                             "FROM products NATURAL JOIN imdb_movies NATURAL JOIN " +
                             "imdb_directormovies NATURAL JOIN imdb_directors WHERE " +
                             "prod_id = " + str(prod_id))
-        print(search_query)
         ret = db_conn.execute(search_query)
         f = list(ret)[0]
         film = {'titulo': f[0], 'anio': f[1], 'director': f[2], 'precio': f[3], 'id': f[4],
@@ -331,6 +328,58 @@ def db_insertItemCart(orderid, prod_id, unit_price, quantity):
         print("-"*60)
 
         return False #TODO: Maybe return None to differenciate from False?
+
+
+def db_deleteItemCart(prod_id, orderid):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        query_str = 'DELETE FROM orderdetail WHERE prod_id='+str(prod_id)+' AND orderid='+str(orderid)
+        ret = db_conn.execute(query_str)
+        ret.close()
+        db_conn.close()
+
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return None
+
+
+def db_getProdsTitles(prodid_lst):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        query_str = 'SELECT prod_id, movietitle FROM imdb_movies NATURAL JOIN products WHERE '
+        where_str = ' OR '.join(["prod_id='"+ str(id) + "'" for id in prodid_lst])
+        query_str += where_str
+
+        ret = db_conn.execute(query_str)
+
+        list_ret = list(ret)
+        dict_ret = {i[0]:i[1] for i in list_ret}
+
+        ret.close()
+        db_conn.close()
+        return dict_ret
+
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return None
 
 
 def db_getHistory(customerid):

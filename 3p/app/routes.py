@@ -139,7 +139,7 @@ def login():
             ### DEBUG PLS
             userdata['cart'].update(session['cart'])
             session['cart'].update(userdata['cart'])
-            _dump_cart()
+            _update_cart()
 
         else:
             session['cart'] = userdata['cart']
@@ -148,7 +148,7 @@ def login():
         last_email = request.cookies.get('last_email')
         return render_template('login.html', last_email=last_email)
 
-def _dump_cart():
+def _update_cart():
     db.db_saveCart(session['cart'], session['orderid'])
 
 def _update_userdata(*argv):
@@ -190,18 +190,23 @@ def product(id):
         if int(request.form.get('amount')) < 0:
             return render_template('product.html', title=film['titulo'], film=film)
 
-        if session.get('cart').get(id): # If item is already added
+        if not session.get('cart'):
+            session['cart'] = {int(id): (int(request.form.get('amount')), float(film['precio']))}
+
+        elif session.get('cart').get(id): # If item is already added
             session['cart'][int(id)][0] = int(request.form.get('amount'))
 
             if(int(request.form.get('amount')) == 0):
                 session['cart'].pop(int(id), None)
-        elif session.get('cart'):
-            session['cart'][int(id)] = (int(request.form.get('amount')), float(film['precio']))
+
         else:
-            session['cart'] = {int(id): (int(request.form.get('amount')), float(film['precio']))}
+            session['cart'][int(id)] = (int(request.form.get('amount')), float(film['precio']))
 
         if session.get('mail'):
-            _dump_cart()
+            if int(request.form.get('amount')) == 0:
+                db.db_deleteItemCart(id, session['orderid'])
+            else:
+                _update_cart()
 
     return render_template('product.html', title=film['titulo'], film=film)
 
@@ -211,22 +216,22 @@ def cart():
     total = 0
     if not session.get('cart'):
         session['cart'] = {}
+        films = None
+    else:
+        if request.method == 'POST': # Delete item from cart
+            prod_id = request.form.get('prod_id')
+            session['cart'].pop(int(prod_id), None)
+            if session.get('mail'):
+                db.db_deleteItemCart(prod_id, session['orderid'])
 
-    if request.method == 'POST':
-        prod_id = request.form.get('prod_id')
-        session['cart'].pop(int(prod_id), None)
+        title_dict = db.db_getProdsTitles(session['cart'].keys())
 
-    with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
-        catalogue = json.loads(data_file.read())
-        films = catalogue['peliculas']
-        films = list(filter(lambda f: int(f['id']) in session['cart'].keys(), films))
+        films = [{'id':prod_id, 'titulo':title_dict[prod_id],'amount': session['cart'][prod_id][0], 'precio': session['cart'][prod_id][1], 'animal': 1+prod_id%40, 'theme': prod_id%16}  for prod_id in session['cart'].keys()]
 
-    for f in films:
-        f['amount'] = session['cart'][f['id']]
-        total += f['precio']*f['amount']
+        for f in films:
+            total += float(f['precio'])*int(f['amount'])
 
-    total = round(total, 2)
-
+        total = round(total, 2)
     return render_template('cart.html', films=films, total=total)
 
 
