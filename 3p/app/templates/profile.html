@@ -15,7 +15,7 @@
 <form class="form-container" action="{{ url_for('profile') }}" method="post">
     <span class="input-title">Dirección actual: {{ session.address }}</span>
     <div class="address-input">
-        <input id="address" type="text" name="address" placeholder="Nueva dirección">
+        <input id="address" type="text" name="address" placeholder="Nueva dirección" maxlength="49">
     </div>
     <input class="register-button" type="submit" name="submit" value="Cambiar dirección">
 </form>

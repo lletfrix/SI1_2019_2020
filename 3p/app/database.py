@@ -141,7 +141,6 @@ def db_saveCart(sess_cart, orderid):
         values_str = ','.join(["('"+ str(orderid) + "','" + str(id) + "','" + str(sess_cart[id][0]) + "','" + str(sess_cart[id][1]) +"')" for id in sess_cart.keys() ])
 
         query_str += (values_str + ' ON CONFLICT (orderid, prod_id) DO UPDATE SET quantity=excluded.quantity')
-        print('###############################################', query_str) # TODO: DEBUG
         ret = db_conn.execute(query_str)
         db_conn.close()
         ret.close()
@@ -505,6 +504,32 @@ def db_updateCash(customerid, cash):
         return None
 
 
+def db_updateAddress(customerid, address):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        query_str = "UPDATE customers SET address1='"+str(address)+"' WHERE "
+        where_str = "customerid="+str(customerid)
+        query_str += where_str
+
+        ret = db_conn.execute(text(query_str))
+        ret.close()
+        db_conn.close()
+        return True
+
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return None
+
+
 def db_getTotalOrder(orderid):
     try:
         # Connect to database
@@ -533,17 +558,18 @@ def db_getTotalOrder(orderid):
 
         return None
 
-if __name__ == "__main__":
-    # print(db_userData('mail@mail.es'))
-    # print(db_registerUser('hallow', '123456789', 'mail@mail.es', 'alex', 'santo', 'plaza marina', 'lalin', 'pont', 'espana', 'visa', '1234567891234567', '222203'))
-    # print(db_insertItemCart(181791, 9, 19, 2))
 
-    # title_part = "George"
-    # print(db_search(title_part))
-    # print("=======================")
-
-    # print(db_getGenres(), "|||", len(db_getGenres()))
-
-    hist_ret = db_getHistory(5)
-    print(hist_ret, "|||", len(hist_ret))
-    print("\n=====\n", hist_ret[0])
+# if __name__ == "__main__":
+#     # print(db_userData('mail@mail.es'))
+#     # print(db_registerUser('hallow', '123456789', 'mail@mail.es', 'alex', 'santo', 'plaza marina', 'lalin', 'pont', 'espana', 'visa', '1234567891234567', '222203'))
+#     # print(db_insertItemCart(181791, 9, 19, 2))
+#
+#     # title_part = "George"
+#     # print(db_search(title_part))
+#     # print("=======================")
+#
+#     # print(db_getGenres(), "|||", len(db_getGenres()))
+#
+#     hist_ret = db_getHistory(5)
+#     print(hist_ret, "|||", len(hist_ret))
+#     print("\n=====\n", hist_ret[0])

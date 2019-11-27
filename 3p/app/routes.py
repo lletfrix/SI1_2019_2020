@@ -52,10 +52,6 @@ def index():
             session['topventas'] = films
         else:
             films = session['topventas']
-        # with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
-        #     catalogue = json.loads(data_file.read())
-        #     films = catalogue['peliculas']
-        #     films = sorted(films, key=(lambda m : m['anio']), reverse=True)[:10]
 
         return render_template('index.html', title='Home', films=films, search_query=None, genres=genres)
 
@@ -121,9 +117,6 @@ def login():
 
 
         userdata['orderid'] = db.db_initCart(userdata['customerid'])
-        #DEBUG
-        print("== CUSTOMERID: ", userdata['customerid'])
-        print("== NULL ORDERID: ", userdata['orderid'])
 
         userdata['cart'] = db.db_getCart(userdata['orderid'])
 
@@ -217,7 +210,7 @@ def product(id):
 
 @app.route('/cart', methods=['GET', 'POST'])
 def cart():
-    total = 0
+    total = -1
     films = []
     if not session.get('cart'):
         session['cart'] = {}
@@ -233,7 +226,8 @@ def cart():
 
             films = [{'id':prod_id, 'titulo':title_dict[prod_id],'amount': session['cart'][prod_id][0], 'precio': session['cart'][prod_id][1], 'animal': 1+prod_id%40, 'theme': prod_id%16}  for prod_id in session['cart'].keys()]
 
-        total = db.db_getTotalOrder(session['orderid'])
+        if session.get('mail'):
+            total = db.db_getTotalOrder(session['orderid'])
 
     return render_template('cart.html', films=films, total=total)
 
@@ -245,7 +239,6 @@ def purchase():
 
     if not session.get('cart'):
         return redirect(url_for('index'))
-    # slug_nick = session['nickname'].lower()
 
     total = 0
 
@@ -254,11 +247,6 @@ def purchase():
         flash('No se dispone de suficiente stock suficiente de algún producto.')
         return redirect(url_for('cart'));
 
-    # Calculate total price
-    # for prod_id in session['cart']:
-    #     product = session['cart'][prod_id]
-    #     total += product[0]*product[1]
-    # total = round(total, 2)
     total = db.db_getTotalOrder(session['orderid'])
     # If there's not enough cash, cancel
     if session['cash'] < total:
@@ -272,47 +260,10 @@ def purchase():
 
     # Updates user cash
     session['cash'] -= total
+    session['cash'] = round(session['cash'], 2)
     db.db_updateCash(session['customerid'], session['cash'])
     return redirect(url_for('index'))
 
-    # with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
-    #     catalogue = json.loads(data_file.read())
-    #     films = catalogue['peliculas']
-    #     films = list(filter(lambda f: int(f['id']) in session['cart'].keys(), films))
-
-    # for f in films:
-    #     f['amount'] = session['cart'][f['id']]
-    #     total += f['precio']*f['amount']
-    #
-    # if session['cash'] >= total:
-    #     session['cash'] -= total
-    #     session['cash'] = round(session['cash'], 2)
-
-    #     with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), encoding="utf-8") as data_file:
-    #         history = json.loads(data_file.read())
-    #
-    #     history['historial'].extend([{'id': f['id'], 'date': date.today().strftime("%d-%b-%Y"), 'address': session['address'], 'price': f['precio'], 'amount': f['amount']} for f in films])
-    #
-    #     with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), 'w') as file:
-    #         json.dump(history, file)
-    #
-    #     session['cart'] = {}
-    #     _update_userdata('cart', 'cash')
-    #     return redirect(url_for('index'))
-    #
-    # else:
-    #     flash('No dispone de saldo para esta compra.')
-    #     return redirect(url_for('cart'))
-
-
-# def _cmp_dates(date):
-#     # Format is dd-mmm-yyyy
-#     months = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06',
-#               'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'}
-#     d = date[:2]
-#     m = months[date[3:6]]
-#     y = date[7:]
-#     return int(y+m+d)
 
 
 @app.route('/history', methods=['GET'])
@@ -341,11 +292,13 @@ def profile():
     if request.method == 'POST':
         if request.form.get('address'):
             session['address'] = request.form.get('address')
+            db.db_updateAddress(session['customerid'], session['address'])
 
         elif request.form.get('cash'):
             try:
                 session['cash'] += float(request.form.get('cash'))
                 session['cash'] = round(session['cash'], 2)
+                db.db_updateCash(session['customerid'], session['cash'])
             except ValueError:
                 flash('Por favor, introduzca un valor válido para el saldo')
 
