@@ -18,14 +18,17 @@ BEGIN
         WHERE orderid=NEW.orderid;
         RETURN NEW;
     ELSE
+    UPDATE orders
         nprods := (SELECT COUNT(*) FROM orderdetail WHERE orderdetail.orderid=OLD.orderid);
-        IF nprods=0 THEN
-            DELETE FROM orders
-            WHERE orders.orderid=OLD.orderid;
-        ELSE
+        IF nprods > 0 THEN
             UPDATE orders
             SET netamount=netamount-(OLD.price*OLD.quantity)
             WHERE orderid=OLD.orderid;
+        ----- WE DO NOT DELETE orderid EVEN IF THE CART IS EMPTY BECAUSE orderid IDENTIFIES THE CART
+        -- ELSE
+            -- DELETE FROM orders
+            -- WHERE orders.orderid=OLD.orderid;
+        ---------------------------------------------------------------------------------------
         END IF;
         RETURN NEW;
     END IF;

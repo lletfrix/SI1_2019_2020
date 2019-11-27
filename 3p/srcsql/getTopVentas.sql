@@ -58,13 +58,14 @@ $$ LANGUAGE plpgsql;
 
 
 ---------------------------- STRUCTURED QUERY VERSION ----------------------------
+-- TODO
 -- CREATE VIEW AmountPerYearTable AS
 -- SELECT movieid, DATE_PART('year', orderdate) as yr, sum(quantity) as amount_per_year
 -- FROM orders, orderdetail, products
 -- WHERE orders.orderid=orderdetail.orderid
 --     AND orderdetail.prod_id=products.prod_id
 --     AND DATE_PART('year', orderdate) >= $1
---     GROUP BY yr, movieid;
+--     GROUP BY yr, products.prod_id;
 --
 -- CREATE VIEW Maximums AS
 -- SELECT APYT.movieid, MaxAmountPerYearTable.MaxAmountYear, MaxAmountPerYearTable.yr

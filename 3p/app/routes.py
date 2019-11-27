@@ -121,6 +121,9 @@ def login():
 
 
         userdata['orderid'] = db.db_initCart(userdata['customerid'])
+        #DEBUG
+        print("== CUSTOMERID: ", userdata['customerid'])
+        print("== NULL ORDERID: ", userdata['orderid'])
 
         userdata['cart'] = db.db_getCart(userdata['orderid'])
 
@@ -214,9 +217,9 @@ def product(id):
 @app.route('/cart', methods=['GET', 'POST'])
 def cart():
     total = 0
+    films = []
     if not session.get('cart'):
         session['cart'] = {}
-        films = None
     else:
         if request.method == 'POST': # Delete item from cart
             prod_id = request.form.get('prod_id')
@@ -224,9 +227,10 @@ def cart():
             if session.get('mail'):
                 db.db_deleteItemCart(prod_id, session['orderid'])
 
-        title_dict = db.db_getProdsTitles(session['cart'].keys())
+        if session['cart']:
+            title_dict = db.db_getProdsTitles(session['cart'].keys())
 
-        films = [{'id':prod_id, 'titulo':title_dict[prod_id],'amount': session['cart'][prod_id][0], 'precio': session['cart'][prod_id][1], 'animal': 1+prod_id%40, 'theme': prod_id%16}  for prod_id in session['cart'].keys()]
+            films = [{'id':prod_id, 'titulo':title_dict[prod_id],'amount': session['cart'][prod_id][0], 'precio': session['cart'][prod_id][1], 'animal': 1+prod_id%40, 'theme': prod_id%16}  for prod_id in session['cart'].keys()]
 
         for f in films:
             total += float(f['precio'])*int(f['amount'])
