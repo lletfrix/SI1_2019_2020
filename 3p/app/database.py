@@ -388,20 +388,29 @@ def db_getHistory(customerid):
         db_conn = None
         db_conn = db_engine.connect()
 
-        where_str = "orders.customerid="+str(customerid)+" AND "
-        where_str += "orders.orderid=orderdetail.orderid AND "
-        where_str += "orderdetail.prod_id=products.prod_id AND "
-        where_str += "products.movieid=imdb_movies.movieid AND "
-        where_str += "orders.status IS NOT NULL"
-        query = select([db_tb_orders.c.orderid, db_tb_orders.c.orderdate,\
-                        db_tb_orders.c.netamount, db_tb_orders.c.totalamount,\
-                        db_tb_products.c.prod_id, db_tb_orderdetail.c.quantity,\
-                        db_tb_movies.c.movietitle]).where(text(where_str))
+        query_str = "SELECT movietitle, address1, quantity, orderdetail.price, orderdate, products.prod_id " + \
+                    "FROM imdb_movies, customers, products, orderdetail, orders " + \
+                    "WHERE orders.customerid="+str(customerid)+" AND orders.status IS NOT NULL " + \
+                    "AND orders.orderid=orderdetail.orderid AND orderdetail.prod_id=products.prod_id " +\
+                    "AND products.movieid=imdb_movies.movieid AND customers.customerid="+str(customerid)
 
-        hist_ret = db_conn.execute(query)
+        hist_ret = db_conn.execute(query_str)
+
+        hist_list = list(hist_ret)
+        hist_ret.close()
+
+        hist_dict = [{
+            'titulo': str(item[0]),
+            'address': item[1],
+            'amount': int(item[2]),
+            'price': float(item[3]),
+            'date': item[4],
+            'animal': 1+item[5]%40,
+            'theme': item[5]%16
+        } for item in hist_list]
 
         db_conn.close() # Close the connection
-        return list(hist_ret)
+        return hist_dict
     except:
         if db_conn is not None:
             db_conn.close()
@@ -423,5 +432,6 @@ if __name__ == "__main__":
 
     # print(db_getGenres(), "|||", len(db_getGenres()))
 
-    hist_ret = db_getHistory(9)
+    hist_ret = db_getHistory(5)
     print(hist_ret, "|||", len(hist_ret))
+    print("\n=====\n", hist_ret[0])

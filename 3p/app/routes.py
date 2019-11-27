@@ -279,39 +279,25 @@ def purchase():
         return redirect(url_for('cart'));
 
 
-def _cmp_dates(date):
-    # Format is dd-mmm-yyyy
-    months = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06',
-              'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'}
-    d = date[:2]
-    m = months[date[3:6]]
-    y = date[7:]
-    return int(y+m+d)
+# def _cmp_dates(date):
+#     # Format is dd-mmm-yyyy
+#     months = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06',
+#               'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'}
+#     d = date[:2]
+#     m = months[date[3:6]]
+#     y = date[7:]
+#     return int(y+m+d)
 
 
 @app.route('/history', methods=['GET'])
 def history():
-    if not session.get('nickname'):
+    if not session.get('mail'):
         return redirect(url_for('login'))
 
-    slug_nick = session.get('nickname').lower()
-
-    with open(os.path.join(app.root_path, USERS_FOLDER, slug_nick, HIST_FILE), encoding="utf-8") as data_file:
-        history = json.loads(data_file.read())
-        history = history['historial']
-
-    with open(os.path.join(app.root_path, CATALOGUE_FILE), encoding="utf-8") as data_file:
-        catalogue = json.loads(data_file.read())
-        films = catalogue['peliculas']
-
-    for dh in history:
-        for df in films:
-            if dh['id'] == df['id']:
-                dh.update(df)
-                break
+    history = db.db_getHistory(session['customerid'])
 
     dates = [f['date'] for f in history]
-    dates.sort(key=_cmp_dates, reverse=True)
+    dates.sort(reverse=True)
     grouped_history = OrderedDict()
     for date in dates:
         grouped_history[date] = []
