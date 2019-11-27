@@ -100,7 +100,7 @@ def db_getCart(orderid):
         db_conn = None
         db_conn = db_engine.connect()
 
-        # Search for the cart of the user of the given email
+        # Search for the cart of the user of the given orderid
         query_str = 'SELECT prod_id, quantity, price FROM orderdetail '
         query_str += 'WHERE orderid='+str(orderid)
         cart_rows = db_conn.execute(query_str)
@@ -136,12 +136,12 @@ def db_saveCart(sess_cart, orderid):
         db_conn = None
         db_conn = db_engine.connect()
 
-        print('###############################################', sess_cart) # TODO: DEBUG
         query_str = 'INSERT INTO orderdetail(orderid, prod_id, quantity, price ) VALUES'
 
         values_str = ','.join(["('"+ str(orderid) + "','" + str(id) + "','" + str(sess_cart[id][0]) + "','" + str(sess_cart[id][1]) +"')" for id in sess_cart.keys() ])
 
         query_str += (values_str + ' ON CONFLICT (orderid, prod_id) DO UPDATE SET quantity=excluded.quantity')
+        print('###############################################', query_str) # TODO: DEBUG
         ret = db_conn.execute(query_str)
         db_conn.close()
         ret.close()
@@ -504,6 +504,34 @@ def db_updateCash(customerid, cash):
 
         return None
 
+
+def db_getTotalOrder(orderid):
+    try:
+        # Connect to database
+        db_conn = None
+        db_conn = db_engine.connect()
+
+        query_str = "SELECT totalamount FROM orders WHERE orderid="+str(orderid)
+
+        ret = db_conn.execute(text(query_str))
+        ret_lst = list(ret)
+        ret.close()
+        db_conn.close()
+
+        if(len(ret_lst)):
+            return float(ret_lst[0][0])
+
+        return 0
+
+    except:
+        if db_conn is not None:
+            db_conn.close()
+        print("Exception in DB access:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stderr)
+        print("-"*60)
+
+        return None
 
 if __name__ == "__main__":
     # print(db_userData('mail@mail.es'))

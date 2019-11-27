@@ -181,6 +181,7 @@ def logout():
     session.pop('mail', None)
     # Deleting cart data in case another user logs in
     session.pop('cart', None)
+    session.pop('topventas', None)
     return resp
 
 
@@ -196,10 +197,10 @@ def product(id):
         if not session.get('cart'):
             session['cart'] = {int(id): (int(request.form.get('amount')), float(film['precio']))}
 
-        elif session.get('cart').get(id): # If item is already added
-            session['cart'][int(id)][0] = int(request.form.get('amount'))
+        elif session.get('cart').get(int(id)) is not None: # If item is already added
+            session['cart'][int(id)] = (int(request.form.get('amount')), session['cart'][int(id)][1])
 
-            if(int(request.form.get('amount')) == 0):
+            if( int(request.form.get('amount')) == 0):
                 session['cart'].pop(int(id), None)
 
         else:
@@ -232,10 +233,8 @@ def cart():
 
             films = [{'id':prod_id, 'titulo':title_dict[prod_id],'amount': session['cart'][prod_id][0], 'precio': session['cart'][prod_id][1], 'animal': 1+prod_id%40, 'theme': prod_id%16}  for prod_id in session['cart'].keys()]
 
-        for f in films:
-            total += float(f['precio'])*int(f['amount'])
+        total = db.db_getTotalOrder(session['orderid'])
 
-        total = round(total, 2)
     return render_template('cart.html', films=films, total=total)
 
 
@@ -256,11 +255,11 @@ def purchase():
         return redirect(url_for('cart'));
 
     # Calculate total price
-    for prod_id in session['cart']:
-        product = session['cart'][prod_id]
-        total += product[0]*product[1]
-    total = round(total, 2)
-
+    # for prod_id in session['cart']:
+    #     product = session['cart'][prod_id]
+    #     total += product[0]*product[1]
+    # total = round(total, 2)
+    total = db.db_getTotalOrder(session['orderid'])
     # If there's not enough cash, cancel
     if session['cash'] < total:
         flash('No dispone de saldo para esta compra.')
