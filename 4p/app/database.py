@@ -18,8 +18,8 @@ def getListaCliMes(db_conn, mes, anio, iumbral, iintervalo, use_prepare, break0,
 
     # TODO: implementar la consulta; asignar nombre 'cc' al contador resultante
     consulta = " ... "
-    
-    # TODO: ejecutar la consulta 
+
+    # TODO: ejecutar la consulta
     # - mediante PREPARE, EXECUTE, DEALLOCATE si use_prepare es True
     # - mediante db_conn.execute() si es False
 
@@ -34,10 +34,10 @@ def getListaCliMes(db_conn, mes, anio, iumbral, iintervalo, use_prepare, break0,
         dbr.append({"umbral":iumbral,"contador":res['cc']})
 
         # TODO: si break0 es True, salir si contador resultante es cero
-        
+
         # Actualizacion de umbral
         iumbral = iumbral + iintervalo
-                
+
     return dbr
 
 def getMovies(anio):
@@ -55,29 +55,29 @@ def getMovies(anio):
             # build up the dictionary
             d[tup[0]] = tup[1]
         a.append(d)
-        
-    resultproxy.close()  
-    
-    db_conn.close()  
-    
+
+    resultproxy.close()
+
+    db_conn.close()
+
     return a
-    
+
 def getCustomer(username, password):
     # conexion a la base de datos
     db_conn = db_engine.connect()
 
     query="select * from customers where username='" + username + "' and password='" + password + "'"
     res=db_conn.execute(query).first()
-    
-    db_conn.close()  
+
+    db_conn.close()
 
     if res is None:
         return None
     else:
         return {'firstname': res['firstname'], 'lastname': res['lastname']}
-    
+
 def delCustomer(customerid, bFallo, bSQL, duerme, bCommit):
-    
+
     # Array de trazas a mostrar en la página
     dbr=[]
 
@@ -87,16 +87,18 @@ def delCustomer(customerid, bFallo, bSQL, duerme, bCommit):
     # - usar sentencias SQL ('BEGIN', 'COMMIT', ...) si bSQL es True
     # - suspender la ejecución 'duerme' segundos en el punto adecuado para forzar deadlock
     # - ir guardando trazas mediante dbr.append()
-    
+
     try:
+        pass
         # TODO: ejecutar consultas
 
     except Exception as e:
+        pass
         # TODO: deshacer en caso de error
 
     else:
+        pass
         # TODO: confirmar cambios si todo va bien
 
-        
-    return dbr
 
+    return dbr
