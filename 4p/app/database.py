@@ -14,7 +14,10 @@ def dbConnect():
 
 def dbCloseConnect(db_conn):
     db_conn.close()
+########################################################################################
 
+
+########################################################################################
 
 def _query_loop(db_conn, query_str_wo_thh, iumbral, iintervalo, break0, niter):
     # Query result array for each threshold
@@ -60,100 +63,86 @@ def getListaCliMes(db_conn, mes, anio, iumbral, iintervalo, use_prepare, break0,
         dbr = _query_loop(db_conn, query_str_wo_thh, iumbral, iintervalo, break0, niter)
 
     return dbr
+########################################################################################
+
+
+########################################################################################
+
+query_delInventory = "UPDATE inventory " +\
+                     "SET sales=sales-orderdetail.quantity " +\
+                     "FROM orderdetail, orders " +\
+                     "WHERE inventory.prod_id=orderdetail.prod_id AND " +\
+                     "orderdetail.orderid=orders.orderid AND " +\
+                     "orders.customerid="
+query_delOrderdetail = "DELETE FROM orderdetail " +\
+                       "USING orders " +\
+                       "WHERE orderdetail.orderid=orders.orderid AND " +\
+                       "orders.customerid="
+query_delOrders = "DELETE FROM orders " +\
+                  "WHERE orders.customerid="
+query_delCustomers = "DELETE FROM customers " +\
+                     "WHERE customerid="
+
+def _parse_error_message(exc_str):
+    ret = ""
+    ind = exc_str.find("\n")
+    ret = exc_str[:ind]
+    return ret
 
 
 def _delCustomerExec(customerid, bFallo, duerme, bCommit):
     dbr = []
     db_conn = dbConnect()
 
-    query_delInventory = "UPDATE inventory " +\
-                         "SET sales=sales-orderdetail.quantity " +\
-                         "FROM orderdetail, orders " +\
-                         "WHERE inventory.prod_id=orderdetail.prod_id AND " +\
-                         "orderdetail.orderid=orders.orderid AND " +\
-                         "orders.customerid="+str(customerid)
-    query_delOrderdetail = "DELETE FROM orderdetail " +\
-                           "USING orders " +\
-                           "WHERE orderdetail.orderid=orders.orderid AND " +\
-                           "orders.customerid="+str(customerid)
-    query_delOrders = "DELETE FROM orders " +\
-                      "WHERE orders.customerid="+str(customerid)
-    query_delCustomers = "DELETE FROM customers " +\
-                         "WHERE customerid="+str(customerid)
-    savepoint_name = "initialSP"
-
     try:
+        # Init transaction BEGIN
+        ret = db_conn.execute("BEGIN")
+        ret.close()
+        dbr.append({"safe":"BEGIN transaction"})
+        # Updating inventory
+        ret = db_conn.execute(query_delInventory+str(customerid))
+        ret.close()
+        dbr.append({"safe":"Updated inventory entries for customerid="+str(customerid)})
+
         if bFallo:
         # Forcing database error and rolling back
-            # Init transaction BEGIN
-            ret = db_conn.execute("BEGIN")
-            print("===> begin")
-            #ret.close()
-            dbr.append({"safe":"BEGIN transaction"})
-            # Creating initial SAVEPOINT
-            ret = db_conn.execute("SAVEPOINT "+savepoint_name)
-            print("===> savep")
-            #ret.close()
-            dbr.append({"safe":"Created SAVEPOINT "+savepoint_name})
-            # Updating inventory
-            ret = db_conn.execute(query_delInventory)
-            print("===> del Invet")
-            #ret.close()
-            dbr.append({"safe":"Updated inventory entries for customerid="+str(customerid)})
             # Deleting orders data (WITHOUT DELETING orderdetail data before!)
-            ret = db_conn.execute(query_delOrders)
-            print("===> orders")
-            #ret.close()
+            ret = db_conn.execute(query_delOrders+str(customerid))
+            ret.close()
             dbr.append({"safe":"Deleted orders entries for customerid="+str(customerid)})
             # Deleting orderdetail data
-            ret = db_conn.execute(query_delOrderdetail)
-            print("===> orderdt")
-            #ret.close()
+            ret = db_conn.execute(query_delOrderdetail+str(customerid))
+            ret.close()
             dbr.append({"safe":"Deleted orderdetail entries for customerid="+str(customerid)})
             # Deleting customer data
-            ret = db_conn.execute(query_delCustomers)
-            #ret.close()
+            ret = db_conn.execute(query_delCustomers+str(customerid))
+            ret.close()
             dbr.append({"safe":"Deleted customers entry for customerid="+str(customerid)})
 
         else:
         # Good transaction
-            # Init transaction BEGIN
-            ret = db_conn.execute("BEGIN")
-            print("")
-            ret.close()
-            dbr.append({"safe":"BEGIN transaction"})
-            # Creating initial SAVEPOINT
-            ret = db_conn.execute("SAVEPOINT "+savepoint_name)
-            ret.close()
-            dbr.append({"safe":"Created SAVEPOINT "+savepoint_name})
-            # Updating inventory
-            ret = db_conn.execute(query_delInventory)
-            ret.close()
-            dbr.append({"safe":"Updated inventory entries for customerid="+str(customerid)})
             # Deleting orderdetail data
-            ret = db_conn.execute(query_delOrderdetail)
+            ret = db_conn.execute(query_delOrderdetail+str(customerid))
             ret.close()
             dbr.append({"safe":"Deleted orderdetail entries for customerid="+str(customerid)})
             # Deleting orders data
-            ret = db_conn.execute(query_delOrders)
+            ret = db_conn.execute(query_delOrders+str(customerid))
             ret.close()
             dbr.append({"safe":"Deleted orders entries for customerid="+str(customerid)})
             # Deleting customer data
-            ret = db_conn.execute(query_delCustomers)
+            ret = db_conn.execute(query_delCustomers+str(customerid))
             ret.close()
             dbr.append({"safe":"Deleted customers entry for customerid="+str(customerid)})
 
     except Exception as e:
-        print("===== EXCEPTIIIIIIIOOOOOOOOOOOOON =====", str(e))
-        ret = db_conn.execute("ROLLBACK TO "+savepoint_name) # TODO: Does not work properly
+        ret = db_conn.execute("ROLLBACK")
         ret.close()
-        dbr.append({"safe":"An Error ocurred during transaction. Rolling back to savepoint "+savepoint_name})
+        dbr.append({"safe":"An Error ocurred during transaction. Rolling back. "+_parse_error_message(str(e))})
 
     else:
         ret = db_conn.execute("COMMIT")
         ret.close()
         dbr.append({"safe":"Customer data deleted successfully"})
-        ret = db_conn.execute("RELEASE SAVEPOINT ")
 
     dbCloseConnect(db_conn)
     return dbr
@@ -161,6 +150,52 @@ def _delCustomerExec(customerid, bFallo, duerme, bCommit):
 def _delCustomerAlc(customerid, bFallo, duerme, bCommit):
     dbr = []
     db_conn = dbConnect()
+
+    try:
+        # Init transaction BEGIN
+        trans = db_conn.begin()
+        dbr.append({"safe":"BEGIN transaction"})
+        # Updating inventory
+        ret = db_conn.execute(query_delInventory+str(customerid))
+        ret.close()
+        dbr.append({"safe":"Updated inventory entries for customerid="+str(customerid)})
+
+        if bFallo:
+        # Forcing database error and rolling back
+            # Deleting orders data (WITHOUT DELETING orderdetail data before!)
+            ret = db_conn.execute(query_delOrders+str(customerid))
+            ret.close()
+            dbr.append({"safe":"Deleted orders entries for customerid="+str(customerid)})
+            # Deleting orderdetail data
+            ret = db_conn.execute(query_delOrderdetail+str(customerid))
+            ret.close()
+            dbr.append({"safe":"Deleted orderdetail entries for customerid="+str(customerid)})
+            # Deleting customer data
+            ret = db_conn.execute(query_delCustomers+str(customerid))
+            ret.close()
+            dbr.append({"safe":"Deleted customers entry for customerid="+str(customerid)})
+
+        else:
+        # Good transaction
+            # Deleting orderdetail data
+            ret = db_conn.execute(query_delOrderdetail+str(customerid))
+            ret.close()
+            dbr.append({"safe":"Deleted orderdetail entries for customerid="+str(customerid)})
+            # Deleting orders data
+            ret = db_conn.execute(query_delOrders+str(customerid))
+            ret.close()
+            dbr.append({"safe":"Deleted orders entries for customerid="+str(customerid)})
+            # Deleting customer data
+            ret = db_conn.execute(query_delCustomers+str(customerid))
+            ret.close()
+            dbr.append({"safe":"Deleted customers entry for customerid="+str(customerid)})
+
+    except Exception as e:
+        trans.rollback()
+        dbr.append({"safe":"An Error ocurred during transaction. Rolling back. "+_parse_error_message(str(e))})
+    else:
+        trans.commit()
+        dbr.append({"safe":"Customer data deleted successfully"})
 
     dbCloseConnect(db_conn)
     return dbr
@@ -183,23 +218,10 @@ def delCustomer(customerid, bFallo, bSQL, duerme, bCommit):
         dbr = _delCustomerAlc(customerid, bFallo, duerme, bCommit)
 
     return dbr
-
-#####################
-    try:
-        pass
-        # TODO: ejecutar consultas
-
-    except Exception as e:
-        pass
-        # TODO: deshacer en caso de error
-
-    else:
-        pass
-        # TODO: confirmar cambios si todo va bien
+########################################################################################
 
 
-    return dbr
-
+########################################################################################
 
 def getMovies(anio):
     # conexion a la base de datos
@@ -222,6 +244,10 @@ def getMovies(anio):
     db_conn.close()
 
     return a
+########################################################################################
+
+
+########################################################################################
 
 def getCustomer(username, password):
     # conexion a la base de datos
@@ -236,6 +262,7 @@ def getCustomer(username, password):
         return None
     else:
         return {'firstname': res['firstname'], 'lastname': res['lastname']}
+########################################################################################
 
 
 
@@ -244,4 +271,10 @@ if __name__ == "__main__":
     #print(getListaCliMes(dbConnect(), 4, 2015, 100, 50, 1, 1, 1000))
 
     # customerid, bFallo, bSQL, duerme, bCommit
-    print(delCustomer(1, 1, 1, 0, 0))
+    print(delCustomer(4, 1, 1, 0, 0))
+    print("")
+    print(delCustomer(4, 0, 1, 0, 0))
+    print("")
+    print(delCustomer(5, 1, 0, 0, 0))
+    print("")
+    print(delCustomer(5, 0, 0, 0, 0))
