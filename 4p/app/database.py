@@ -14,31 +14,52 @@ def dbConnect():
 def dbCloseConnect(db_conn):
     db_conn.close()
 
-def getListaCliMes(db_conn, mes, anio, iumbral, iintervalo, use_prepare, break0, niter):
 
-    # TODO: implementar la consulta; asignar nombre 'cc' al contador resultante
-    consulta = " ... "
-
-    # TODO: ejecutar la consulta
-    # - mediante PREPARE, EXECUTE, DEALLOCATE si use_prepare es True
-    # - mediante db_conn.execute() si es False
-
-    # Array con resultados de la consulta para cada umbral
+def _query_loop(db_conn, query_str_wo_thh, iumbral, iintervalo, break0, niter):
+    # Query result array for each threshold
     dbr=[]
 
-    for ii in range(niter):
+    for i in range(niter):
+        query_str = query_str_wo_thh+", "+str(iumbral)+")"
+        ret = db_conn.execute(query_str)
+        ret_list = list(ret)
 
-        # TODO: ...
+        cont = ret_list[0][0]
+        dbr.append({"umbral":iumbral,"contador":cont})
 
-        # Guardar resultado de la query
-        dbr.append({"umbral":iumbral,"contador":res['cc']})
+        ret.close()
 
-        # TODO: si break0 es True, salir si contador resultante es cero
+        if break0 and not int(ret_list[0][0]):
+            break
 
-        # Actualizacion de umbral
-        iumbral = iumbral + iintervalo
+        iumbral += iintervalo
 
     return dbr
+
+def getListaCliMes(db_conn, mes, anio, iumbral, iintervalo, use_prepare, break0, niter):
+
+    # Query result array for each threshold
+    dbr=[]
+
+    if use_prepare:
+        queryplan_str = "PREPARE clientesDistintosPlan (int, int, numeric) AS "+\
+                    "SELECT * FROM clientesDistintos($1, $2, $3)"
+        ret_prep = db_conn.execute(queryplan_str)
+        ret_prep.close()
+
+        query_str_wo_thh = "EXECUTE clientesDistintosPlan("+str(mes)+", "+str(anio)
+        dbr = _query_loop(db_conn, query_str_wo_thh, iumbral, iintervalo, break0, niter)
+
+        queryplan_str = "DEALLOCATE PREPARE clientesDistintosPlan"
+        ret_prep = db_conn.execute(queryplan_str)
+        ret_prep.close()
+
+    else:
+        query_str_wo_thh = "SELECT * FROM clientesDistintos("+str(mes)+", "+str(anio)
+        dbr = _query_loop(db_conn, query_str_wo_thh, iumbral, iintervalo, break0, niter)
+
+    return dbr
+
 
 def getMovies(anio):
     # conexion a la base de datos
@@ -102,3 +123,8 @@ def delCustomer(customerid, bFallo, bSQL, duerme, bCommit):
 
 
     return dbr
+
+
+
+if __name__ == "__main__":
+    print(getListaCliMes(dbConnect(), 4, 2015, 100, 50, 1, 1, 1000))
