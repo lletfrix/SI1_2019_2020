@@ -1,3 +1,11 @@
+-------------------------------------------------------------------------
+-- Authors:
+--          · Alejandro Santorum Varela
+--          · Rafael Sanchez Sanchez
+--  Date: November 29, 2019
+--  File: clientesDistintos.sql
+--  Project: Computer Systems I Assignments
+-------------------------------------------------------------------------
 
 SELECT COUNT(DISTINCT(customerid))
 FROM orders
