@@ -16,7 +16,7 @@
 
     <h2> Ejemplo de Transacción con Flask SQLAlchemy</h2>
 
-    <form name="entrada" method="get" action="">
+    <form name="entrada" method="post" action="">
       <table>
         <tr><td>Customer ID:</td><td><input type="text" name="customerid" value="1"></td></tr>
       </table>
@@ -35,7 +35,7 @@
       Duerme <input type="text" name="duerme" value="0"></input> segundos (para forzar deadlock).
       </p>
       <p>
-      <input type="submit" value="Enviar"/>
+      <input type="submit" name="send" value="Enviar"/>
       </p>
     </form>
 

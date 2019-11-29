@@ -46,7 +46,7 @@ def listaClientesMes():
 def borraCliente():
     if 'customerid' in request.form:
         customerid = request.form["customerid"]
-        bSQL       = request.form["txnSQL"]
+        bSQL = request.form["txnSQL"]
         bCommit = "bCommit" in request.form
         bFallo  = "bFallo"  in request.form
         duerme  = request.form["duerme"]

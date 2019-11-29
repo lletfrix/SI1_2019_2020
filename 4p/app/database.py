@@ -201,7 +201,6 @@ def _delCustomerAlc(customerid, bFallo, duerme, bCommit):
     return dbr
 
 def delCustomer(customerid, bFallo, bSQL, duerme, bCommit):
-
     # Array de trazas a mostrar en la página
     dbr=[]
 
