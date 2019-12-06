@@ -43,7 +43,7 @@
 
     <ol>
     {% for paso in dbr %}
-        <li>{{ paso.safe }}</li>
+        <li>{{ paso|safe }}</li>
     {% endfor %}
     </ol>
 

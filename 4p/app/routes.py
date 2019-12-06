@@ -9,6 +9,12 @@ import sys
 import time
 
 
+@app.route('/', methods=['GET'])
+@app.route('/index', methods=['GET'])
+def index():
+    return render_template('index.html')
+
+
 @app.route('/listaClientesMes', methods=['GET', 'POST'])
 def listaClientesMes():
     if 'fecha' in request.form:
@@ -56,6 +62,19 @@ def borraCliente():
         return render_template('borraCliente.html')
 
 
+@app.route('/xLoginInjection', methods=['GET','POST'])
+def xLoginInjection():
+    if 'login' in request.form:
+        login  = request.form['login']
+        pswd   = request.form['pswd']
+        print("Login: ", login)
+        print("Password: ", pswd)
+        dbr = database.getCustomer(login, pswd)
+        return render_template('xLoginInjection.html', dbr=dbr)
+    else:
+        return render_template('xLoginInjection.html')
+
+
 @app.route('/xSearchInjection', methods=['GET'])
 def xSearchInjection():
     if 'i_anio' in request.args:
@@ -64,14 +83,3 @@ def xSearchInjection():
         return render_template('xSearchInjection.html', dbr=dbr)
     else:
         return render_template('xSearchInjection.html')
-
-
-@app.route('/xLoginInjection', methods=['GET','POST'])
-def xLoginInjection():
-    if 'login' in request.form:
-        login  = request.form['login']
-        pswd   = request.form['pswd']
-        dbr = database.getCustomer(login, pswd)
-        return render_template('xLoginInjection.html', dbr=dbr)
-    else:
-        return render_template('xLoginInjection.html')

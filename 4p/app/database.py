@@ -89,6 +89,17 @@ def _parse_error_message(exc_str):
     ret = exc_str[:ind]
     return ret
 
+def _check_db_customer(db_conn, dbr, customerid):
+    query_str = "SELECT firstname, lastname FROM customers where customerid="+str(customerid)
+
+    ret = db_conn.execute(query_str)
+    if ret.rowcount == 0:
+        dbr.append("Checking customer data... There is no user with ID="+str(customerid))
+    else:
+        ret_lst = list(ret)
+        dbr.append("Checking customer data... Found customer with ID="+str(customerid)+
+                   " -> Firstname: "+str(ret_lst[0][0])+" Lastname: "+str(ret_lst[0][1]))
+    ret.close()
 
 def _delCustomerExec(customerid, bFallo, duerme, bCommit):
     dbr = []
@@ -98,52 +109,53 @@ def _delCustomerExec(customerid, bFallo, duerme, bCommit):
         # Init transaction BEGIN
         ret = db_conn.execute("BEGIN")
         ret.close()
-        dbr.append({"safe":"BEGIN transaction"})
+        dbr.append("BEGIN transaction")
         # Updating inventory
         ret = db_conn.execute(query_delInventory+str(customerid))
         ret.close()
-        dbr.append({"safe":"Updated inventory entries for customerid="+str(customerid)})
+        dbr.append("Updated inventory entries for customerid="+str(customerid))
 
         if bFallo:
         # Forcing database error and rolling back
             # Deleting orders data (WITHOUT DELETING orderdetail data before!)
             ret = db_conn.execute(query_delOrders+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted orders entries for customerid="+str(customerid)})
+            dbr.append("Deleted orders entries for customerid="+str(customerid))
             # Deleting orderdetail data
             ret = db_conn.execute(query_delOrderdetail+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted orderdetail entries for customerid="+str(customerid)})
+            dbr.append("Deleted orderdetail entries for customerid="+str(customerid))
             # Deleting customer data
             ret = db_conn.execute(query_delCustomers+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted customers entry for customerid="+str(customerid)})
+            dbr.append("Deleted customers entry for customerid="+str(customerid))
 
         else:
         # Good transaction
             # Deleting orderdetail data
             ret = db_conn.execute(query_delOrderdetail+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted orderdetail entries for customerid="+str(customerid)})
+            dbr.append("Deleted orderdetail entries for customerid="+str(customerid))
             # Deleting orders data
             ret = db_conn.execute(query_delOrders+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted orders entries for customerid="+str(customerid)})
+            dbr.append("Deleted orders entries for customerid="+str(customerid))
             # Deleting customer data
             ret = db_conn.execute(query_delCustomers+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted customers entry for customerid="+str(customerid)})
+            dbr.append("Deleted customers entry for customerid="+str(customerid))
 
     except Exception as e:
         ret = db_conn.execute("ROLLBACK")
         ret.close()
-        dbr.append({"safe":"An Error ocurred during transaction. Rolling back. "+_parse_error_message(str(e))})
+        dbr.append("An Error ocurred during transaction. Rolling back. "+_parse_error_message(str(e)))
 
     else:
         ret = db_conn.execute("COMMIT")
         ret.close()
-        dbr.append({"safe":"Customer data deleted successfully"})
+        dbr.append("Customer data deleted successfully")
 
+    _check_db_customer(db_conn, dbr, customerid)
     dbCloseConnect(db_conn)
     return dbr
 
@@ -154,49 +166,50 @@ def _delCustomerAlc(customerid, bFallo, duerme, bCommit):
     try:
         # Init transaction BEGIN
         trans = db_conn.begin()
-        dbr.append({"safe":"BEGIN transaction"})
+        dbr.append("BEGIN transaction")
         # Updating inventory
         ret = db_conn.execute(query_delInventory+str(customerid))
         ret.close()
-        dbr.append({"safe":"Updated inventory entries for customerid="+str(customerid)})
+        dbr.append("Updated inventory entries for customerid="+str(customerid))
 
         if bFallo:
         # Forcing database error and rolling back
             # Deleting orders data (WITHOUT DELETING orderdetail data before!)
             ret = db_conn.execute(query_delOrders+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted orders entries for customerid="+str(customerid)})
+            dbr.append("Deleted orders entries for customerid="+str(customerid))
             # Deleting orderdetail data
             ret = db_conn.execute(query_delOrderdetail+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted orderdetail entries for customerid="+str(customerid)})
+            dbr.append("Deleted orderdetail entries for customerid="+str(customerid))
             # Deleting customer data
             ret = db_conn.execute(query_delCustomers+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted customers entry for customerid="+str(customerid)})
+            dbr.append("Deleted customers entry for customerid="+str(customerid))
 
         else:
         # Good transaction
             # Deleting orderdetail data
             ret = db_conn.execute(query_delOrderdetail+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted orderdetail entries for customerid="+str(customerid)})
+            dbr.append("Deleted orderdetail entries for customerid="+str(customerid))
             # Deleting orders data
             ret = db_conn.execute(query_delOrders+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted orders entries for customerid="+str(customerid)})
+            dbr.append("Deleted orders entries for customerid="+str(customerid))
             # Deleting customer data
             ret = db_conn.execute(query_delCustomers+str(customerid))
             ret.close()
-            dbr.append({"safe":"Deleted customers entry for customerid="+str(customerid)})
+            dbr.append("Deleted customers entry for customerid="+str(customerid))
 
     except Exception as e:
         trans.rollback()
-        dbr.append({"safe":"An Error ocurred during transaction. Rolling back. "+_parse_error_message(str(e))})
+        dbr.append("An Error ocurred during transaction. Rolling back. "+_parse_error_message(str(e)))
     else:
         trans.commit()
-        dbr.append({"safe":"Customer data deleted successfully"})
+        dbr.append("Customer data deleted successfully")
 
+    _check_db_customer(db_conn, dbr, customerid)
     dbCloseConnect(db_conn)
     return dbr
 
@@ -217,6 +230,24 @@ def delCustomer(customerid, bFallo, bSQL, duerme, bCommit):
         dbr = _delCustomerAlc(customerid, bFallo, duerme, bCommit)
 
     return dbr
+########################################################################################
+
+
+########################################################################################
+
+def getCustomer(username, password):
+    # conexion a la base de datos
+    db_conn = db_engine.connect()
+
+    query="select * from customers where username='" + username + "' and password='" + password + "'"
+    res=db_conn.execute(query).first()
+
+    db_conn.close()
+
+    if res is None:
+        return None
+    else:
+        return {'firstname': res['firstname'], 'lastname': res['lastname']}
 ########################################################################################
 
 
@@ -243,24 +274,6 @@ def getMovies(anio):
     db_conn.close()
 
     return a
-########################################################################################
-
-
-########################################################################################
-
-def getCustomer(username, password):
-    # conexion a la base de datos
-    db_conn = db_engine.connect()
-
-    query="select * from customers where username='" + username + "' and password='" + password + "'"
-    res=db_conn.execute(query).first()
-
-    db_conn.close()
-
-    if res is None:
-        return None
-    else:
-        return {'firstname': res['firstname'], 'lastname': res['lastname']}
 ########################################################################################
 
 

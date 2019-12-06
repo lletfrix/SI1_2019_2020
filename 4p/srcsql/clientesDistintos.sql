@@ -114,4 +114,5 @@ WHERE DATE_PART('month', orderdate)=4
       AND DATE_PART('year', orderdate)=2015
       AND totalamount>100;
 
-DROP INDEX monthyeartotal_index;
+-- Uncomment this if you want to delete index
+-- DROP INDEX monthyeartotal_index;
