@@ -19,7 +19,7 @@ FROM orders
 WHERE status='Shipped';
 
 -- Creating index on column status in orders table
-CREATE INDEX status_index ON ORDERS (status);
+CREATE INDEX status_index ON orders (status);
 
 -- Query plan study with indexes
 EXPLAIN
@@ -46,12 +46,13 @@ SELECT COUNT(*)
 FROM orders
 WHERE status='Shipped';
 
-
-
+-- Other two queries of apendix 2
+EXPLAIN
 SELECT COUNT(*)
 FROM orders
 WHERE status='Paid';
 
+EXPLAIN
 SELECT COUNT(*)
 FROM orders
 WHERE status='Processed';

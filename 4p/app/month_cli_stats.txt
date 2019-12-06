@@ -1,0 +1,6 @@
+noindex_prepare=0 1528.98
+noindex_prepare=1 1524.14
+with_index_prepare=0 45.51
+with_index_prepare=1 45.52
+idx_analyze_prepare=0 34.4
+idx_analyze_prepare=1 34.92

@@ -89,21 +89,42 @@ def _parse_error_message(exc_str):
     ret = exc_str[:ind]
     return ret
 
+
 def _check_db_customer(db_conn, dbr, customerid):
     query_str = "SELECT firstname, lastname FROM customers where customerid="+str(customerid)
 
     ret = db_conn.execute(query_str)
     if ret.rowcount == 0:
-        dbr.append("Checking customer data... There is no user with ID="+str(customerid))
+        dbr.append("There is no user with ID="+str(customerid))
     else:
         ret_lst = list(ret)
-        dbr.append("Checking customer data... Found customer with ID="+str(customerid)+
-                   " -> Firstname: "+str(ret_lst[0][0])+" Lastname: "+str(ret_lst[0][1]))
+        str_ret = "Found customer with ID="+str(customerid)+\
+               " -> Firstname: "+str(ret_lst[0][0])+" Lastname: "+str(ret_lst[0][1])+"\n"
+        dbr.append(str_ret)
+
+        query_items_str = "SELECT sum(quantity) FROM orders, orderdetail "+\
+                          "WHERE orders.orderid=orderdetail.orderid AND customerid="+str(customerid)
+        ret2 = db_conn.execute(query_items_str)
+        ret2_lst = list(ret2)
+        ret_num = ret2_lst[0][0]
+        if ret_num is None:
+            dbr.append("There is no purchased items by customer ID="+str(customerid))
+        else:
+            ret2_lst = list(ret2)
+            str_ret2 = "Total number of purchased items by customer with ID="+str(customerid)+" : "+str(ret_num)
+            dbr.append(str_ret2)
+        ret2.close()
+
     ret.close()
+
 
 def _delCustomerExec(customerid, bFallo, duerme, bCommit):
     dbr = []
     db_conn = dbConnect()
+
+    # Previous database check
+    dbr.append("Checking customer data BEFORE trying to delete")
+    _check_db_customer(db_conn, dbr, customerid)
 
     try:
         # Init transaction BEGIN
@@ -117,18 +138,26 @@ def _delCustomerExec(customerid, bFallo, duerme, bCommit):
 
         if bFallo:
         # Forcing database error and rolling back
-            # Deleting orders data (WITHOUT DELETING orderdetail data before!)
-            ret = db_conn.execute(query_delOrders+str(customerid))
-            ret.close()
-            dbr.append("Deleted orders entries for customerid="+str(customerid))
             # Deleting orderdetail data
             ret = db_conn.execute(query_delOrderdetail+str(customerid))
             ret.close()
             dbr.append("Deleted orderdetail entries for customerid="+str(customerid))
-            # Deleting customer data
+            # Intermediate Commit
+            if bCommit:
+                ret = db_conn.execute("COMMIT")
+                ret.close()
+                dbr.append("Intermediate Commit")
+                ret = db_conn.execute("BEGIN")
+                ret.close()
+                dbr.append("BEGIN transaction again")
+            # Deleting customer data (WITHOUT DELETING orders data before!)
             ret = db_conn.execute(query_delCustomers+str(customerid))
             ret.close()
             dbr.append("Deleted customers entry for customerid="+str(customerid))
+            # Deleting orders data
+            ret = db_conn.execute(query_delOrders+str(customerid))
+            ret.close()
+            dbr.append("Deleted orders entries for customerid="+str(customerid))
 
         else:
         # Good transaction
@@ -155,6 +184,7 @@ def _delCustomerExec(customerid, bFallo, duerme, bCommit):
         ret.close()
         dbr.append("Customer data deleted successfully")
 
+    dbr.append("Checking customer data AFTER trying to delete")
     _check_db_customer(db_conn, dbr, customerid)
     dbCloseConnect(db_conn)
     return dbr
@@ -162,6 +192,10 @@ def _delCustomerExec(customerid, bFallo, duerme, bCommit):
 def _delCustomerAlc(customerid, bFallo, duerme, bCommit):
     dbr = []
     db_conn = dbConnect()
+
+    # Previous database check
+    dbr.append("Checking customer data BEFORE trying to delete")
+    _check_db_customer(db_conn, dbr, customerid)
 
     try:
         # Init transaction BEGIN
@@ -174,18 +208,24 @@ def _delCustomerAlc(customerid, bFallo, duerme, bCommit):
 
         if bFallo:
         # Forcing database error and rolling back
-            # Deleting orders data (WITHOUT DELETING orderdetail data before!)
-            ret = db_conn.execute(query_delOrders+str(customerid))
-            ret.close()
-            dbr.append("Deleted orders entries for customerid="+str(customerid))
             # Deleting orderdetail data
             ret = db_conn.execute(query_delOrderdetail+str(customerid))
             ret.close()
             dbr.append("Deleted orderdetail entries for customerid="+str(customerid))
-            # Deleting customer data
+            # Intermediate Commit
+            if bCommit:
+                trans.commit()
+                dbr.append("Intermediate Commit")
+                trans = db_conn.begin()
+                dbr.append("BEGIN transaction again")
+            # Deleting customer data (WITHOUT DELETING orders data before!)
             ret = db_conn.execute(query_delCustomers+str(customerid))
             ret.close()
             dbr.append("Deleted customers entry for customerid="+str(customerid))
+            # Deleting orders data
+            ret = db_conn.execute(query_delOrders+str(customerid))
+            ret.close()
+            dbr.append("Deleted orders entries for customerid="+str(customerid))
 
         else:
         # Good transaction
@@ -209,6 +249,7 @@ def _delCustomerAlc(customerid, bFallo, duerme, bCommit):
         trans.commit()
         dbr.append("Customer data deleted successfully")
 
+    dbr.append("Checking customer data AFTER trying to delete")
     _check_db_customer(db_conn, dbr, customerid)
     dbCloseConnect(db_conn)
     return dbr
