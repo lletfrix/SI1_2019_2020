@@ -89,7 +89,6 @@ def _parse_error_message(exc_str):
     ret = exc_str[:ind]
     return ret
 
-
 def _check_db_customer(db_conn, dbr, customerid):
     query_str = "SELECT firstname, lastname FROM customers where customerid="+str(customerid)
 
@@ -116,7 +115,6 @@ def _check_db_customer(db_conn, dbr, customerid):
         ret2.close()
 
     ret.close()
-
 
 def _delCustomerExec(customerid, bFallo, duerme, bCommit):
     dbr = []

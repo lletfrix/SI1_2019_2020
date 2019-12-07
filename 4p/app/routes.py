@@ -67,8 +67,6 @@ def xLoginInjection():
     if 'login' in request.form:
         login  = request.form['login']
         pswd   = request.form['pswd']
-        print("Login: ", login)
-        print("Password: ", pswd)
         dbr = database.getCustomer(login, pswd)
         return render_template('xLoginInjection.html', dbr=dbr)
     else:
