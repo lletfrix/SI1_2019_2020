@@ -1,4 +1,4 @@
 si1pyenv/
 *.pyc
 clean_fakedb.py
-1401_*
+.gitignore

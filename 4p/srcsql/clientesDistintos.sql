@@ -7,6 +7,7 @@
 --  Project: Computer Systems I Assignments
 -------------------------------------------------------------------------
 
+-- This query is impleneted in a procedure in another file
 SELECT COUNT(DISTINCT(customerid))
 FROM orders
 WHERE DATE_PART('month', orderdate)=4

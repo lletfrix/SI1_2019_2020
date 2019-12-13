@@ -32,6 +32,7 @@ RETURNS TRIGGER AS $$
             AND orders.orderid=aux_tb.orderid;
 
         ------------------------------------
+        -- Uncomment this if you want to create a deadlock with borraCliente page
         -- PERFORM pg_sleep(30);
         ------------------------------------
 

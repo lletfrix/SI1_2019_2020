@@ -1,7 +1,7 @@
 *.pyc
-1401_*
 example-*
 *.gz
 .gitignore
 prepare_test_lock.sql
 updOrders.sql
+1401_Santorum_Sanchez
