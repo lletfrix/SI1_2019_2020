@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import time
 import sys, traceback, time
 import psycopg2
 
@@ -163,6 +164,9 @@ def _delCustomerExec(customerid, bFallo, duerme, bCommit):
             ret = db_conn.execute(query_delOrderdetail+str(customerid))
             ret.close()
             dbr.append("Deleted orderdetail entries for customerid="+str(customerid))
+
+            time.sleep(duerme)
+
             # Deleting orders data
             ret = db_conn.execute(query_delOrders+str(customerid))
             ret.close()
@@ -231,6 +235,11 @@ def _delCustomerAlc(customerid, bFallo, duerme, bCommit):
             ret = db_conn.execute(query_delOrderdetail+str(customerid))
             ret.close()
             dbr.append("Deleted orderdetail entries for customerid="+str(customerid))
+
+            ###########################
+            time.sleep(duerme)
+            ###########################
+
             # Deleting orders data
             ret = db_conn.execute(query_delOrders+str(customerid))
             ret.close()
